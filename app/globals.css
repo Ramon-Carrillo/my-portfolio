@@ -1,130 +1,234 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+/* Lenis base styles — must come after tailwind reset so it wins */
+@import "lenis/dist/lenis.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
+  /* Fonts — map Geist variables injected by next/font */
+  --font-sans:    var(--font-geist-sans);
+  --font-mono:    var(--font-geist-mono);
+  --font-heading: var(--font-geist-sans);
+
+  /* Semantic color tokens → CSS custom properties */
+  --color-background:           var(--background);
+  --color-foreground:           var(--foreground);
+  --color-card:                 var(--card);
+  --color-card-foreground:      var(--card-foreground);
+  --color-popover:              var(--popover);
+  --color-popover-foreground:   var(--popover-foreground);
+  --color-primary:              var(--primary);
+  --color-primary-foreground:   var(--primary-foreground);
+  --color-secondary:            var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
+  --color-muted:                var(--muted);
+  --color-muted-foreground:     var(--muted-foreground);
+  --color-accent:               var(--accent);
+  --color-accent-foreground:    var(--accent-foreground);
+  --color-destructive:          var(--destructive);
+  --color-border:               var(--border);
+  --color-input:                var(--input);
+  --color-ring:                 var(--ring);
+
+  /* Named accent shorthands — use bg-royal, text-royal, hover:bg-royal-hover, etc. */
+  --color-royal:       var(--royal);
+  --color-royal-hover: var(--royal-hover);
+
+  /* Charts */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar */
+  --color-sidebar:                    var(--sidebar);
+  --color-sidebar-foreground:         var(--sidebar-foreground);
+  --color-sidebar-primary:            var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent:             var(--sidebar-accent);
+  --color-sidebar-accent-foreground:  var(--sidebar-accent-foreground);
+  --color-sidebar-border:             var(--sidebar-border);
+  --color-sidebar-ring:               var(--sidebar-ring);
+
+  /* Radius scale */
+  --radius-sm:  calc(var(--radius) * 0.6);
+  --radius-md:  calc(var(--radius) * 0.8);
+  --radius-lg:  var(--radius);
+  --radius-xl:  calc(var(--radius) * 1.4);
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   LIGHT MODE
+   Clean, professional — near-white with a cool blue cast, navy text,
+   royal blue accents darkened for contrast on white.
+   ───────────────────────────────────────────────────────────────────────────── */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Accent tokens */
+  --royal:       oklch(0.45 0.185 264);  /* darkened royal — legible on white */
+  --royal-hover: oklch(0.40 0.160 258);  /* hover — deeper */
+
+  /* Surfaces */
+  --background:      oklch(0.98 0.006 260);   /* near-white, cool cast */
+  --foreground:      oklch(0.14 0.040 258);   /* dark navy text */
+
+  --card:            oklch(1.00 0.003 260);   /* pure white card */
+  --card-foreground: oklch(0.14 0.040 258);
+
+  --popover:            oklch(1.00 0.003 260);
+  --popover-foreground: oklch(0.14 0.040 258);
+
+  /* Primary = royal blue */
+  --primary:            oklch(0.45 0.185 264);
+  --primary-foreground: oklch(0.97 0.006 264);
+
+  /* Secondary surfaces */
+  --secondary:            oklch(0.95 0.008 260);
+  --secondary-foreground: oklch(0.14 0.040 258);
+
+  --muted:            oklch(0.95 0.008 260);
+  --muted-foreground: oklch(0.50 0.030 256);  /* medium blue-gray */
+
+  --accent:            oklch(0.93 0.012 260);  /* subtle hover fill */
+  --accent-foreground: oklch(0.14 0.040 258);
+
+  --destructive: oklch(0.577 0.245 27);
+
+  --border: oklch(0.88 0.012 260);
+  --input:  oklch(0.88 0.012 260);
+  --ring:   oklch(0.45 0.185 264);
+
+  --chart-1: oklch(0.45 0.185 264);
+  --chart-2: oklch(0.55 0.110 292);
+  --chart-3: oklch(0.52 0.088 196);
+  --chart-4: oklch(0.62 0.075  70);
+  --chart-5: oklch(0.52 0.090 262);
+
+  --radius: 0.5rem;
+
+  --sidebar:                    oklch(0.96 0.006 260);
+  --sidebar-foreground:         oklch(0.14 0.040 258);
+  --sidebar-primary:            oklch(0.45 0.185 264);
+  --sidebar-primary-foreground: oklch(0.97 0.006 264);
+  --sidebar-accent:             oklch(0.93 0.012 260);
+  --sidebar-accent-foreground:  oklch(0.14 0.040 258);
+  --sidebar-border:             oklch(0.88 0.012 260);
+  --sidebar-ring:               oklch(0.45 0.185 264);
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   DARK MODE  (DEFAULT)
+   Deep navy premium — true near-black bg, dark navy cards, royal blue accent.
+
+   Depth ladder (background → card → muted/popover → secondary → accent):
+     oklch 0.07 → 0.17 → 0.17/0.21 → 0.21 → 0.25
+   Cool blue-cast at hue 258–264 gives the deep blue-black feel without
+   feeling cold or desaturated.
+
+   Hex reference:
+     background  ≈ #0A0A0A  (very dark near-black)
+     card        ≈ #111E3B  (dark navy)
+     popover     ≈ #1A2333  (secondary surface)
+     accent fill ≈ #2A3447  (dark slate — hover backgrounds)
+     primary     ≈ #5060D7  (royal blue)
+     muted-fg    ≈ #A0A8C0  (blue-gray text)
+
+   Card gradients — use Tailwind gradient utilities:
+     className="bg-gradient-to-br from-[oklch(0.17_0.060_258)] to-[oklch(0.12_0.030_262)]"
+   ───────────────────────────────────────────────────────────────────────────── */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Accent tokens */
+  --royal:       oklch(0.52 0.190 264);  /* ≈ #5060D7 royal blue */
+  --royal-hover: oklch(0.50 0.160 258);  /* ≈ #2A65CB hover — deeper */
+
+  /* Surfaces — each step lighter than the last */
+  --background:      oklch(0.07 0.008 264);   /* ≈ #0A0A0A  deepest near-black */
+  --foreground:      oklch(0.96 0.016 264);   /* ≈ #F0F4FF  off-white, blue cast */
+
+  --card:            oklch(0.17 0.060 258);   /* ≈ #111E3B  dark navy card */
+  --card-foreground: oklch(0.96 0.016 264);
+
+  --popover:            oklch(0.21 0.042 254);  /* ≈ #1A2333  secondary surface */
+  --popover-foreground: oklch(0.96 0.016 264);
+
+  /* Primary = royal blue */
+  --primary:            oklch(0.52 0.190 264);
+  --primary-foreground: oklch(0.96 0.016 264);  /* off-white on blue button */
+
+  /* Secondary surfaces */
+  --secondary:            oklch(0.21 0.042 254);  /* ≈ #1A2333 */
+  --secondary-foreground: oklch(0.96 0.016 264);
+
+  --muted:            oklch(0.17 0.060 258);   /* matches card */
+  --muted-foreground: oklch(0.68 0.032 256);   /* ≈ #A0A8C0  blue-gray */
+
+  --accent:            oklch(0.25 0.042 252);  /* ≈ #2A3447  hover fill */
+  --accent-foreground: oklch(0.96 0.016 264);
+
+  --destructive: oklch(0.65 0.22 25);
+
+  --border: oklch(1 0 0 /  10%);   /* white at 10% — subtle divider */
+  --input:  oklch(1 0 0 /  14%);
+  --ring:   oklch(0.52 0.190 264);
+
+  --chart-1: oklch(0.52 0.190 264);  /* royal blue   */
+  --chart-2: oklch(0.65 0.115 292);  /* soft purple  */
+  --chart-3: oklch(0.58 0.092 196);  /* teal / cyan  */
+  --chart-4: oklch(0.70 0.080  70);  /* warm gold    */
+  --chart-5: oklch(0.58 0.095 262);  /* cornflower   */
+
+  --radius: 0.5rem;
+
+  --sidebar:                    oklch(0.13 0.055 258);
+  --sidebar-foreground:         oklch(0.96 0.016 264);
+  --sidebar-primary:            oklch(0.52 0.190 264);
+  --sidebar-primary-foreground: oklch(0.96 0.016 264);
+  --sidebar-accent:             oklch(0.25 0.042 252);
+  --sidebar-accent-foreground:  oklch(0.96 0.016 264);
+  --sidebar-border:             oklch(1 0 0 / 10%);
+  --sidebar-ring:               oklch(0.52 0.190 264);
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   BASE LAYER
+   ───────────────────────────────────────────────────────────────────────────── */
 @layer base {
+  /* Let Lenis own all scrolling — prevent native smooth-scroll double-fire */
+  html {
+    scroll-behavior: auto !important;
+    @apply font-sans;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
-  html {
-    @apply font-sans;
+
+  /* Offset anchors below the fixed 3.5 rem (56 px) navbar */
+  section[id] {
+    scroll-margin-top: 3.5rem;
+  }
+
+  /* Text selection — royal blue tint */
+  ::selection {
+    background-color: oklch(0.52 0.190 264 / 30%);
+    color: inherit;
+  }
+
+  /* Smooth theme transitions — only color properties, never layout */
+  *,
+  ::before,
+  ::after {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
   }
 }
