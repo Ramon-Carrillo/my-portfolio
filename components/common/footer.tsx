@@ -1,6 +1,6 @@
 "use client";
 
-import { FaGithub, FaLinkedin, FaXTwitter } from "react-icons/fa6";
+import { FaGithub, FaLinkedin } from "react-icons/fa6";
 import { Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,9 +11,8 @@ const QUICK_LINKS = [
 ] as const;
 
 const SOCIAL_LINKS = [
-  { label: "GitHub",   href: "https://github.com",   icon: FaGithub   },
-  { label: "LinkedIn", href: "https://linkedin.com", icon: FaLinkedin },
-  { label: "X",        href: "https://x.com",        icon: FaXTwitter },
+  { label: "GitHub",   href: "https://github.com/Ramon-Carrillo",              icon: FaGithub   },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/ramon-carrillo/", icon: FaLinkedin },
 ] as const;
 
 export function Footer() {

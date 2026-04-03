@@ -19,30 +19,41 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://yoursite.com"),
+  metadataBase: new URL("https://ramoncarrillo.dev"),
   title: {
     default: "Ramon | Full-Stack Developer",
     template: "%s | Ramon",
   },
   description:
-    "Full-stack developer building clean, accessible, and performant web applications with Next.js, React, and TypeScript.",
+    "Ramon Carrillo — full-stack developer specialising in Next.js, React, and TypeScript. Building clean, accessible, and performant web applications with modern tools like Tailwind CSS, Prisma, Stripe, and Framer Motion.",
   keywords: [
+    "Ramon Carrillo",
     "Full-Stack Developer",
     "Next.js",
     "React",
     "TypeScript",
-    "Portfolio",
+    "Tailwind CSS",
+    "Framer Motion",
+    "Prisma",
+    "PostgreSQL",
+    "Stripe",
+    "Supabase",
+    "Node.js",
+    "Accessibility",
+    "WCAG",
     "Web Developer",
+    "Portfolio",
+    "JavaScript",
   ],
-  authors: [{ name: "Ramon" }],
+  authors: [{ name: "Ramon Carrillo" }],
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://yoursite.com",
+    url: "https://ramoncarrillo.dev",
     siteName: "Ramon | Portfolio",
     title: "Ramon | Full-Stack Developer",
     description:
-      "Full-stack developer building clean, accessible, and performant web applications.",
+      "Full-stack developer specialising in Next.js, React, and TypeScript — building clean, accessible, and performant web apps.",
     images: [
       {
         url: "/images/og-image.png",
@@ -56,7 +67,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Ramon | Full-Stack Developer",
     description:
-      "Full-stack developer building clean, accessible, and performant web applications.",
+      "Full-stack developer specialising in Next.js, React, and TypeScript — building clean, accessible, and performant web apps.",
     images: ["/images/og-image.png"],
   },
   robots: { index: true, follow: true },

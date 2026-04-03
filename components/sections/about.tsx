@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { User } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 // ─── content ─────────────────────────────────────────────────────────────────
@@ -13,17 +13,23 @@ const BIO = [
 ] as const;
 
 const STACK = [
-  "Next.js",
-  "React",
   "TypeScript",
+  "React / Next.js",
   "Tailwind CSS",
   "Framer Motion",
   "Node.js",
-  "Figma",
+  "PostgreSQL",
+  "Prisma",
+  "Stripe",
+  "Supabase",
+  "OpenAI",
+  "Zod",
+  "React Hook Form",
+  "shadcn/ui",
+  "Recharts",
+  "Figma API",
+  "Storybook",
   "Accessibility",
-  "SEO",
-  "AI",
-  "UI Design",
 ] as const;
 
 // ─── animation variants ───────────────────────────────────────────────────────
@@ -108,41 +114,14 @@ export function About() {
             className="mx-auto w-full max-w-[280px] lg:sticky lg:top-24"
           >
             <div className="relative w-full overflow-hidden rounded-2xl border border-border bg-card" style={{ aspectRatio: "3/4" }}>
-              {/* Decorative gradient fill */}
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "radial-gradient(ellipse at 65% 30%, oklch(0.52 0.190 264 / 14%), transparent 62%)",
-                  backgroundColor: "oklch(0.52 0.190 264 / 5%)",
-                }}
+              <Image
+                src="/images/about-picutre.JPG"
+                alt="Ramon"
+                fill
+                className="object-cover"
+                style={{ objectPosition: "10% top" }}
+                priority
               />
-              {/* Floating decorative circles */}
-              <div
-                className="absolute -right-8 -top-8 size-36 rounded-full"
-                style={{ backgroundColor: "oklch(0.52 0.190 264 / 10%)" }}
-              />
-              <div
-                className="absolute -bottom-4 left-6 size-20 rounded-full"
-                style={{ backgroundColor: "oklch(0.52 0.190 264 / 8%)" }}
-              />
-              <div
-                className="absolute right-10 top-12 size-8 rounded-full"
-                style={{ backgroundColor: "oklch(0.52 0.190 264 / 12%)" }}
-              />
-
-              {/* Placeholder icon + label */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                <div className={cn(
-                  "flex size-20 items-center justify-center rounded-full",
-                  "border border-border bg-background/60 backdrop-blur-sm",
-                )}>
-                  <User className="size-9 text-muted-foreground/50" aria-hidden="true" />
-                </div>
-                <span className="text-xs text-muted-foreground/55">
-                  Add your photo here
-                </span>
-              </div>
             </div>
           </motion.div>
 
