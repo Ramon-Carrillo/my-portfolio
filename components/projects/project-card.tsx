@@ -48,7 +48,7 @@ export function getAccentBase(id: string) {
 const cardVariants = {
   rest: {
     y: 0,
-    transition: { duration: 0.3, ease: "easeOut" },
+    transition: { duration: 0.3, ease: "easeOut" as const },
   },
   hovered: {
     y: -5,

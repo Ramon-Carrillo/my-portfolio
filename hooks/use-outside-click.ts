@@ -7,7 +7,7 @@ import { useEffect, type RefObject } from "react";
  * Useful for closing dropdowns and modals.
  */
 export function useOutsideClick<T extends HTMLElement>(
-  ref: RefObject<T>,
+  ref: RefObject<T | null>,
   handler: () => void,
 ) {
   useEffect(() => {
