@@ -21,8 +21,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://ramoncarrillo.dev"),
   title: {
-    default: "Ramon | Full-Stack Developer",
-    template: "%s | Ramon",
+    default: "Ramon Carrillo | Full-Stack Developer",
+    template: "%s | Ramon Carrillo",
   },
   description:
     "Ramon Carrillo — full-stack developer specialising in Next.js, React, and TypeScript. Building clean, accessible, and performant web applications with modern tools like Tailwind CSS, Prisma, Stripe, and Framer Motion.",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://ramoncarrillo.dev",
     siteName: "Ramon | Portfolio",
-    title: "Ramon | Full-Stack Developer",
+    title: "Ramon Carrillo | Full-Stack Developer",
     description:
       "Full-stack developer specialising in Next.js, React, and TypeScript — building clean, accessible, and performant web apps.",
     images: [
@@ -59,18 +59,50 @@ export const metadata: Metadata = {
         url: "/images/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Ramon — Full-Stack Developer Portfolio",
+        alt: "Ramon Carrillo — Full-Stack Developer Portfolio",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ramon | Full-Stack Developer",
+    title: "Ramon Carrillo | Full-Stack Developer",
     description:
       "Full-stack developer specialising in Next.js, React, and TypeScript — building clean, accessible, and performant web apps.",
     images: ["/images/og-image.png"],
   },
   robots: { index: true, follow: true },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://ramoncarrillo.dev/#person",
+      name: "Ramon Carrillo",
+      url: "https://ramoncarrillo.dev",
+      jobTitle: "Full-Stack Developer",
+      sameAs: [
+        "https://github.com/Ramon-Carrillo",
+        "https://www.linkedin.com/in/ramon-carrillo/",
+      ],
+      knowsAbout: [
+        "Next.js",
+        "React",
+        "TypeScript",
+        "Tailwind CSS",
+        "Node.js",
+        "PostgreSQL",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://ramoncarrillo.dev/#website",
+      url: "https://ramoncarrillo.dev",
+      name: "Ramon Carrillo — Full-Stack Developer",
+      author: { "@id": "https://ramoncarrillo.dev/#person" },
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -83,6 +115,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col bg-background text-foreground" suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Providers>
           <SmoothScroll>
             <Navbar />

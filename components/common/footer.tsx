@@ -1,7 +1,7 @@
 "use client";
 
 import { FaGithub, FaLinkedin } from "react-icons/fa6";
-import { Heart } from "lucide-react";
+import { Mail, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const QUICK_LINKS = [
@@ -11,9 +11,12 @@ const QUICK_LINKS = [
 ] as const;
 
 const SOCIAL_LINKS = [
-  { label: "GitHub",   href: "https://github.com/Ramon-Carrillo",              icon: FaGithub   },
+  { label: "GitHub",   href: "https://github.com/Ramon-Carrillo",           icon: FaGithub   },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/ramon-carrillo/", icon: FaLinkedin },
 ] as const;
+
+// Update this to your real email address
+const EMAIL = "hello@ramoncarrillo.dev";
 
 export function Footer() {
   return (
@@ -29,12 +32,19 @@ export function Footer() {
               href="#hero"
               className="text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-primary"
             >
-              Ramon
+              Ramon Carrillo
             </a>
             <p className="max-w-[18rem] text-xs leading-relaxed text-muted-foreground">
               Full-stack developer building clean, accessible, and performant
               web applications.
             </p>
+            <a
+              href={`mailto:${EMAIL}`}
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-primary"
+            >
+              <Mail className="size-3" aria-hidden="true" />
+              {EMAIL}
+            </a>
           </div>
 
           {/* Quick links */}
@@ -87,7 +97,7 @@ export function Footer() {
 
         {/* ── Bottom row: copyright + made with love ── */}
         <div className="flex flex-col items-center gap-2 text-xs text-muted-foreground sm:flex-row sm:justify-between">
-          <span>© 2026 Ramon. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Ramon Carrillo. All rights reserved.</span>
           <span className="flex items-center gap-1.5">
             Made with{" "}
             <Heart

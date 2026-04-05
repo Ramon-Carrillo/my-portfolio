@@ -116,7 +116,7 @@ export function About() {
             <div className="relative w-full overflow-hidden rounded-2xl border border-border bg-card" style={{ aspectRatio: "3/4" }}>
               <Image
                 src="/images/about-picutre.JPG"
-                alt="Ramon"
+                alt="Ramon Carrillo, Full-Stack Developer"
                 fill
                 className="object-cover"
                 style={{ objectPosition: "10% top" }}

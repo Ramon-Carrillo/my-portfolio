@@ -29,7 +29,7 @@ export async function sendContactEmail(_: State | null, formData: FormData): Pro
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   const { error } = await resend.emails.send({
-    from: "Portfolio Contact <onboarding@resend.dev>",
+    from: "Portfolio Contact <hello@ramoncarrillo.dev>",
     to: process.env.CONTACT_EMAIL!,
     replyTo: email,
     subject: `New message from ${name}`,
@@ -37,6 +37,7 @@ export async function sendContactEmail(_: State | null, formData: FormData): Pro
   });
 
   if (error) {
+    console.error("[contact] Resend error:", error);
     return { success: false, error: "Failed to send message. Please try again." };
   }
 

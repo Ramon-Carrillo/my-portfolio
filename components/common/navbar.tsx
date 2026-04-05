@@ -1,38 +1,70 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Menu, X, FileText } from 'lucide-react'
 import { FaGithub, FaLinkedin } from 'react-icons/fa6'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { useActiveSection } from '@/hooks/use-active-section'
+import { cn } from '@/lib/utils'
 
 const NAV_LINKS = [
-  { label: 'About', href: '#about' },
-  { label: 'Projects', href: '#projects' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'About',    href: '#about',    id: 'about'    },
+  { label: 'Projects', href: '#projects', id: 'projects' },
+  { label: 'Contact',  href: '#contact',  id: 'contact'  },
 ] as const
 
 const SOCIAL_LINKS = [
-  { label: 'GitHub',   href: 'https://github.com/Ramon-Carrillo',              icon: FaGithub   },
+  { label: 'GitHub',   href: 'https://github.com/Ramon-Carrillo',           icon: FaGithub   },
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/ramon-carrillo/', icon: FaLinkedin },
 ] as const
 
 export function Navbar() {
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const active = useActiveSection(['hero', 'about', 'projects', 'contact'])
+
+  function handleNavClick() {
+    setMobileOpen(false)
+  }
+
+  useEffect(() => {
+    function onResize() {
+      if (window.innerWidth >= 640) setMobileOpen(false)
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [mobileOpen])
+
   return (
     <header className='fixed inset-x-0 top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-sm'>
       <div className='mx-auto flex h-14 max-w-5xl items-center justify-between px-6'>
+
         {/* ── Logo ── */}
         <a
           href='#hero'
+          onClick={handleNavClick}
           className='text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-primary'>
-          Ramon
+          Ramon Carrillo
         </a>
 
         {/* ── Nav links (desktop) ── */}
-        <nav aria-label='Primary navigation'>
-          <ul className='hidden items-center gap-7 sm:flex'>
-            {NAV_LINKS.map(({ label, href }) => (
+        <nav aria-label='Primary navigation' className='hidden sm:block'>
+          <ul className='flex items-center gap-7'>
+            {NAV_LINKS.map(({ label, href, id }) => (
               <li key={href}>
                 <a
                   href={href}
-                  className='text-sm text-muted-foreground transition-colors hover:text-foreground'>
+                  className={cn(
+                    'text-sm transition-colors',
+                    active === id
+                      ? 'font-medium text-foreground'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}>
                   {label}
                 </a>
               </li>
@@ -40,9 +72,23 @@ export function Navbar() {
           </ul>
         </nav>
 
-        {/* ── Social icons + theme toggle ── */}
+        {/* ── Right side: resume + social + theme ── */}
         <div className='flex items-center gap-0.5'>
-          {/* Social icons — hidden on mobile */}
+          {/* Resume button (desktop) */}
+          <a
+            href='/resume.pdf'
+            target='_blank'
+            rel='noopener noreferrer'
+            className={cn(
+              'mr-2 hidden sm:inline-flex items-center gap-1.5 rounded-md px-3 py-1.5',
+              'text-xs font-medium text-muted-foreground border border-border',
+              'transition-colors hover:border-primary/50 hover:text-primary',
+            )}>
+            <FileText className='size-3' aria-hidden='true' />
+            Resume
+          </a>
+
+          {/* Social icons */}
           <div className='mr-1.5 hidden items-center gap-0.5 sm:flex'>
             {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
               <a
@@ -58,8 +104,76 @@ export function Navbar() {
           </div>
 
           <ThemeToggle />
+
+          {/* ── Hamburger (mobile only) ── */}
+          <button
+            type='button'
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileOpen}
+            aria-controls='mobile-nav'
+            onClick={() => setMobileOpen((v) => !v)}
+            className='ml-1 inline-flex size-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:hidden'>
+            {mobileOpen ? <X size={16} /> : <Menu size={16} />}
+          </button>
         </div>
       </div>
+
+      {/* ── Mobile menu ── */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            id='mobile-nav'
+            key='mobile-menu'
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className='border-t border-border/40 bg-background/95 backdrop-blur-sm sm:hidden'>
+            <nav aria-label='Mobile navigation'>
+              <ul className='flex flex-col px-6 py-4'>
+                {NAV_LINKS.map(({ label, href, id }) => (
+                  <li key={href}>
+                    <a
+                      href={href}
+                      onClick={handleNavClick}
+                      className={cn(
+                        'flex h-11 items-center text-sm transition-colors',
+                        active === id
+                          ? 'font-medium text-foreground'
+                          : 'text-muted-foreground hover:text-foreground',
+                      )}>
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <div className='flex items-center gap-2 border-t border-border/40 px-6 py-4'>
+                <a
+                  href='/resume.pdf'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  onClick={handleNavClick}
+                  className='inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary'>
+                  <FileText className='size-3' aria-hidden='true' />
+                  Resume
+                </a>
+                {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    aria-label={label}
+                    onClick={handleNavClick}
+                    className='inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground'>
+                    <Icon size={16} />
+                  </a>
+                ))}
+              </div>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }

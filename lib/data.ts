@@ -1,13 +1,13 @@
-import type { Experience, Project, Skill } from "./types";
+import type { Project } from "./types";
 
 export const projects: Project[] = [
   {
     id: "chimneys-plus",
     title: "Chimneys Plus",
     description:
-      "A modern, responsive website for a chimney and fireplace services company. Built with clean design and smooth user experience to help homeowners easily book maintenance, repairs, and installations.",
+      "Responsive marketing website for a chimney and fireplace services company — clean design, fast performance, and easy contact flows.",
     longDescription:
-      "Chimneys Plus is a full-stack marketing website for a professional chimney, fireplace, and home maintenance service provider. The goal was to create a trustworthy, modern online presence that makes it easy for homeowners to learn about services, view past work, and get in touch quickly.\n\nKey features include:\n\n- Clean, professional design with strong visual hierarchy\n- Service showcase with clear descriptions and call-to-actions\n- Responsive layout that works beautifully on mobile and desktop\n- Fast loading performance and excellent SEO foundation\n- Contact forms and booking inquiry flows\n\nThis project demonstrates my ability to build polished, client-facing websites that balance aesthetics with usability while highlighting a local service business effectively.",
+      "A marketing website for a local chimney and fireplace service provider. Built to establish a trustworthy online presence with a service showcase, responsive layout, and contact/booking flows. Focused on performance and SEO to help the business get found and convert visitors into leads.",
     tags: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Framer Motion", "shadcn/ui", "Responsive Design", "SEO"],
     image: "/images/chimneys-plus.png",
     href: "https://chimneys-plus-r7y931kot-thewiscokid81-8404s-projects.vercel.app/",
@@ -71,20 +71,3 @@ export const projects: Project[] = [
   },
 ];
 
-export const experience: Experience[] = [
-  {
-    role: "Role Title",
-    company: "Company Name",
-    period: "Jan 2024 – Present",
-    description: "What you built, owned, or improved.",
-  },
-];
-
-export const skills: Skill[] = [
-  { name: "TypeScript", category: "frontend" },
-  { name: "React / Next.js", category: "frontend" },
-  { name: "Tailwind CSS", category: "frontend" },
-  { name: "Node.js", category: "backend" },
-  { name: "PostgreSQL", category: "backend" },
-  { name: "Git", category: "tools" },
-];

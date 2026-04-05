@@ -154,6 +154,13 @@ export function ProjectCard({ project, onSelect }: ProjectCardProps) {
           />
         )}
 
+        {/* Concept badge — shown when project has no live link or repo */}
+        {!hasLinks && (
+          <span className="absolute left-3 top-3 rounded-md bg-background/80 px-2 py-0.5 text-xs font-medium text-muted-foreground backdrop-blur-sm">
+            Concept
+          </span>
+        )}
+
         {/* ── Hover overlay — Live Demo + GitHub icons ── */}
         {hasLinks && (
           <motion.div
@@ -227,6 +234,46 @@ export function ProjectCard({ project, onSelect }: ProjectCardProps) {
             </span>
           )}
         </div>
+
+        {/* Mobile links — always visible on touch devices, hidden on desktop where hover overlay takes over */}
+        {hasLinks && (
+          <div className="mt-4 flex gap-2 sm:hidden">
+            {project.href && (
+              <a
+                href={project.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Live demo — ${project.title}`}
+                onClick={(e) => e.stopPropagation()}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5",
+                  "text-xs font-medium text-muted-foreground",
+                  "transition-colors hover:border-primary/50 hover:text-primary",
+                )}
+              >
+                <ExternalLink className="size-3" aria-hidden="true" />
+                Live Demo
+              </a>
+            )}
+            {project.repo && (
+              <a
+                href={project.repo}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`GitHub — ${project.title}`}
+                onClick={(e) => e.stopPropagation()}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5",
+                  "text-xs font-medium text-muted-foreground",
+                  "transition-colors hover:border-primary/50 hover:text-primary",
+                )}
+              >
+                <FaGithub size={12} aria-hidden="true" />
+                GitHub
+              </a>
+            )}
+          </div>
+        )}
       </div>
     </motion.article>
   );
