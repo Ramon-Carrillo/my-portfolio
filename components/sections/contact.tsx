@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useTransition } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -39,23 +39,33 @@ const VP = { once: true, margin: "-80px" } as const;
 
 export function Contact() {
   const reduced = useReducedMotion() ?? false;
-  const [state, action] = useActionState(sendContactEmail, null);
-  const [pending, startTransition] = useTransition();
+  const [pending, setPending] = useState(false);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { name: "", email: "", message: "" },
   });
 
-  useEffect(() => {
-    if (!state) return;
-    if (state.success) {
-      toast.success("Message sent! I'll get back to you soon.");
-      reset();
-    } else {
-      toast.error(state.error);
+  const onSubmit = async (data: FormValues) => {
+    setPending(true);
+    try {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("email", data.email);
+      formData.append("message", data.message);
+      const result = await sendContactEmail(null, formData);
+      if (result.success) {
+        toast.success("Message sent! I'll get back to you soon.");
+        reset();
+      } else {
+        toast.error(result.error);
+      }
+    } catch {
+      toast.error("Failed to send message. Please try again.");
+    } finally {
+      setPending(false);
     }
-  }, [state, reset]);
+  };
 
   return (
     <section id="contact" className="px-6 py-24">
@@ -87,11 +97,7 @@ export function Contact() {
           </p>
 
           <form
-            onSubmit={handleSubmit((_, e) => {
-              startTransition(() => {
-                action(new FormData(e?.target as HTMLFormElement));
-              });
-            })}
+            onSubmit={handleSubmit(onSubmit)}
             className="space-y-4"
           >
             <div className="space-y-1">
