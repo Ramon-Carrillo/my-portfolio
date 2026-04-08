@@ -44,6 +44,7 @@ export function Contact() {
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
+    defaultValues: { name: "", email: "", message: "" },
   });
 
   useEffect(() => {
