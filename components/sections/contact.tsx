@@ -87,7 +87,6 @@ export function Contact() {
           </p>
 
           <form
-            action={action}
             onSubmit={handleSubmit((_, e) => {
               startTransition(() => {
                 action(new FormData(e?.target as HTMLFormElement));
