@@ -29,7 +29,7 @@ export const projects: Project[] = [
     id: "eco-shop",
     title: "EcoShop",
     description:
-      "Full-stack e-commerce platform with an AI customer support agent powered by Claude — handles orders, returns, and product discovery.",
+      "Sustainable e-commerce storefront with an AI-powered customer support agent built on Claude.",
     longDescription:
       "A sustainable products storefront with an intelligent AI customer support agent built on the Vercel AI SDK and Claude Sonnet. The agent handles five key scenarios: order status lookups, return processing with eligibility checks, item-by-item billing breakdowns, product discovery with sustainability scoring, and de-escalation for frustrated customers. Features streaming responses with chain-of-thought reasoning, seven specialized database tools via Prisma, and security guardrails including rate limiting, origin validation, and prompt injection protection.",
     tags: ["Next.js", "TypeScript", "Claude AI", "Vercel AI SDK", "Prisma", "PostgreSQL", "Tailwind CSS", "Framer Motion", "Zod"],
