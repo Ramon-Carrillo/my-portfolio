@@ -118,9 +118,9 @@ export function About() {
                 src="/images/about-picture.JPG"
                 alt="Ramon Carrillo, Full-Stack Developer"
                 fill
+                sizes="280px"
                 className="object-cover"
                 style={{ objectPosition: "10% top" }}
-                priority
               />
             </div>
           </motion.div>

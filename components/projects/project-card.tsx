@@ -84,9 +84,10 @@ const iconVariants = {
 interface ProjectCardProps {
   project: Project;
   onSelect: (project: Project) => void;
+  priority?: boolean;
 }
 
-export function ProjectCard({ project, onSelect }: ProjectCardProps) {
+export function ProjectCard({ project, onSelect, priority }: ProjectCardProps) {
   const base     = getAccentBase(project.id);
   const hasLinks = project.href || project.repo;
 
@@ -151,6 +152,7 @@ export function ProjectCard({ project, onSelect }: ProjectCardProps) {
             fill
             className="object-cover"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            priority={priority}
           />
         )}
 

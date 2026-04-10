@@ -15,11 +15,12 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {projects.map((project) => (
+        {projects.map((project, i) => (
           <ProjectCard
             key={project.id}
             project={project}
             onSelect={setSelected}
+            priority={i < 3}
           />
         ))}
       </div>
