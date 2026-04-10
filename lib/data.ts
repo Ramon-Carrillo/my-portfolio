@@ -33,7 +33,7 @@ export const projects: Project[] = [
     longDescription:
       "A sustainable products storefront with an intelligent AI customer support agent built on the Vercel AI SDK and Claude Sonnet. The agent handles five key scenarios: order status lookups, return processing with eligibility checks, item-by-item billing breakdowns, product discovery with sustainability scoring, and de-escalation for frustrated customers. Features streaming responses with chain-of-thought reasoning, seven specialized database tools via Prisma, and security guardrails including rate limiting, origin validation, and prompt injection protection.",
     tags: ["Next.js", "TypeScript", "Claude AI", "Vercel AI SDK", "Prisma", "PostgreSQL", "Tailwind CSS", "Framer Motion", "Zod"],
-    image: "/images/eco-shop.png",
+    image: "/images/ecoshop.png",
     href: "https://ecoshop-coral.vercel.app/",
     repo: "https://github.com/Ramon-Carrillo/eco_shop",
   },
