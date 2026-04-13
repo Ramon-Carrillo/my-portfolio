@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Menu, X, FileText } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { FaGithub, FaLinkedin } from 'react-icons/fa6'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useActiveSection } from '@/hooks/use-active-section'
@@ -72,22 +72,8 @@ export function Navbar() {
           </ul>
         </nav>
 
-        {/* ── Right side: resume + social + theme ── */}
+        {/* ── Right side: social + theme ── */}
         <div className='flex items-center gap-0.5'>
-          {/* Resume button (desktop) */}
-          <a
-            href='/resume.pdf'
-            target='_blank'
-            rel='noopener noreferrer'
-            className={cn(
-              'mr-2 hidden sm:inline-flex items-center gap-1.5 rounded-md px-3 py-1.5',
-              'text-xs font-medium text-muted-foreground border border-border',
-              'transition-colors hover:border-primary/50 hover:text-primary',
-            )}>
-            <FileText className='size-3' aria-hidden='true' />
-            Resume
-          </a>
-
           {/* Social icons */}
           <div className='mr-1.5 hidden items-center gap-0.5 sm:flex'>
             {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
@@ -148,15 +134,6 @@ export function Navbar() {
                 ))}
               </ul>
               <div className='flex items-center gap-2 border-t border-border/40 px-6 py-4'>
-                <a
-                  href='/resume.pdf'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  onClick={handleNavClick}
-                  className='inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary'>
-                  <FileText className='size-3' aria-hidden='true' />
-                  Resume
-                </a>
                 {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
                   <a
                     key={label}
