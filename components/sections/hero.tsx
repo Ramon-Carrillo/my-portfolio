@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import dynamic from 'next/dynamic'
-import { ArrowRight, Mail, ChevronDown, FileText } from 'lucide-react'
+import { ArrowRight, Mail, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const Player = dynamic(
@@ -110,22 +110,6 @@ export function Hero() {
               Get In Touch
             </motion.a>
 
-            <motion.a
-              href='/resume.pdf'
-              target='_blank'
-              rel='noopener noreferrer'
-              whileHover={reduced ? undefined : { scale: 1.025 }}
-              whileTap={reduced ? undefined : { scale: 0.975 }}
-              className={cn(
-                'inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5',
-                'text-sm font-medium text-foreground',
-                'transition-colors hover:border-primary/50 hover:bg-accent hover:text-primary',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                'focus-visible:ring-offset-2 focus-visible:ring-offset-background'
-              )}>
-              <FileText className='size-4' aria-hidden='true' />
-              Resume
-            </motion.a>
           </motion.div>
         </motion.div>
 
