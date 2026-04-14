@@ -10,7 +10,7 @@ export const projects: Project[] = [
       "A marketing website for a local chimney and fireplace service provider. Built to establish a trustworthy online presence with a service showcase, responsive layout, and contact/booking flows. Focused on performance and SEO to help the business get found and convert visitors into leads.",
     tags: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Framer Motion", "shadcn/ui", "Responsive Design", "SEO"],
     image: "/images/chimneys-plus.png",
-    href: "https://chimneys-plus-r7y931kot-thewiscokid81-8404s-projects.vercel.app/",
+    href: "https://chimneys-plus.vercel.app/",
     repo: "https://github.com/Ramon-Carrillo/chimneys-plus",
   },
   {
