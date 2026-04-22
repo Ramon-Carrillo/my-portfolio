@@ -1,14 +1,9 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import dynamic from 'next/dynamic'
 import { ArrowRight, Mail, ChevronDown } from 'lucide-react'
+import { HeroCodeDemo } from '@/components/sections/hero-code-demo'
 import { cn } from '@/lib/utils'
-
-const Player = dynamic(
-  () => import('@lottiefiles/react-lottie-player').then((m) => m.Player),
-  { ssr: false }
-)
 
 // ─── animation variants ───────────────────────────────────────────────────────
 
@@ -114,20 +109,10 @@ export function Hero() {
           </motion.div>
         </motion.div>
 
-        {/* ── Right: Lottie animation ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-          className='flex items-center justify-center lg:justify-end'
-          aria-hidden='true'>
-          <Player
-            autoplay={!reduced}
-            loop={!reduced}
-            src='/astronaut.json'
-            style={{ width: 'min(528px, 80vw)', height: 'min(528px, 80vw)' }}
-          />
-        </motion.div>
+        {/* ── Right: live retrieval demo (replaces the previous Lottie) ── */}
+        <div className='flex items-center justify-center lg:justify-end'>
+          <HeroCodeDemo />
+        </div>
       </div>
 
       {/* ── Scroll-down cue ── */}
