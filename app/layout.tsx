@@ -30,11 +30,17 @@ const DESCRIPTION =
 const SHORT_DESCRIPTION =
   "Full-stack developer specialising in Next.js, TypeScript, and Claude. RAG systems, AI agents, and Stripe-powered storefronts — all shipped live.";
 
+// The OG-preview tool flagged a <40-char title. SERP tools consistently
+// recommend 50-60 chars: long enough to carry a real value prop, short
+// enough not to get truncated with an ellipsis. This lands at 58.
+const TITLE_DEFAULT =
+  "Ramon Carrillo · Full-Stack Developer — Next.js & Claude";
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Ramon Carrillo | Full-Stack Developer",
-    template: "%s | Ramon Carrillo",
+    default: TITLE_DEFAULT,
+    template: "%s · Ramon Carrillo",
   },
   description: DESCRIPTION,
   // Keywords have near-zero direct SEO value today, but they're still
@@ -69,26 +75,21 @@ export const metadata: Metadata = {
     canonical: SITE_URL,
   },
   openGraph: {
+    // `images` is intentionally omitted — the `app/opengraph-image.tsx`
+    // file route auto-generates a correctly-sized 1200x630 image and
+    // Next.js wires it into these meta tags at build time. Passing
+    // `images` here would override the generated version.
     type: "website",
     locale: "en_US",
     url: SITE_URL,
     siteName: "Ramon Carrillo — Portfolio",
-    title: "Ramon Carrillo | Full-Stack Developer",
+    title: TITLE_DEFAULT,
     description: SHORT_DESCRIPTION,
-    images: [
-      {
-        url: "/images/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Ramon Carrillo — Full-Stack Developer Portfolio",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ramon Carrillo | Full-Stack Developer",
+    title: TITLE_DEFAULT,
     description: SHORT_DESCRIPTION,
-    images: ["/images/og-image.png"],
   },
   robots: {
     index: true,
