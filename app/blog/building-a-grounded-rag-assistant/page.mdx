@@ -97,9 +97,11 @@ export const metadata = {
 
 ## The problem
 
-I spent a year at HCLTech as a Tier 1 Google Maps Platform support engineer. Every day, the same questions came in: *RefererNotAllowedMapError*, *OVER_QUERY_LIMIT*, *how do I migrate off `google.maps.Marker`*, *does the $200 credit still exist*. Most of the answers were in Google's docs — the developers couldn't find them, or got tripped up by outdated Stack Overflow posts that referenced APIs that had been renamed or deprecated.
+I spent a year on the Tier 1 Google Maps Platform support queue at HCLTech. Every day, the same questions came in: *RefererNotAllowedMapError*, *OVER_QUERY_LIMIT*, *how do I migrate off `google.maps.Marker`*, *how do I keep my $200 monthly credit from running out mid-month*. Most of the answers were in Google's docs — the developers couldn't find them, or got tripped up by outdated Stack Overflow posts that referenced APIs that had been renamed, deprecated, or restructured.
 
-So I built a RAG chatbot to answer those questions. The promise of RAG — *Retrieval-Augmented Generation* — is that you avoid hallucination by grounding the model's answers in documentation you control. Sounds simple. Took me several major iterations and a fundamental architecture rethink to actually deliver on it.
+Since then, the Maps Platform landscape has shifted. Google retired the $200 monthly credit and replaced it with per-SKU free tiers. The Places API was relabeled, the Routes API got its SKU names rewritten, and the Drawing and Heatmap libraries went onto a 2026 sunset track. The kind of support-engineer-in-a-browser tool I wish had existed back then would need to not just know the 2024 answers — it would need to stay current with whatever Google has changed since.
+
+So I built one. The promise of RAG — *Retrieval-Augmented Generation* — is that you avoid hallucination by grounding the model's answers in documentation you control. Sounds simple. Took me several major iterations and a fundamental architecture rethink to actually deliver on it.
 
 This is the post-mortem of those iterations. Every score I quote is from a committed eval run in the [repo's `evals/results/` directory](https://github.com/Ramon-Carrillo/google-maps-rag-assistant/tree/main/evals/results). Every prompt version is in the file header of [`system-prompt.md`](https://github.com/Ramon-Carrillo/google-maps-rag-assistant/blob/main/src/lib/prompts/system-prompt.md).
 
