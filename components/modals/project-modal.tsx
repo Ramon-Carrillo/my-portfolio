@@ -7,7 +7,7 @@ import Image from "next/image";
 import type { Project } from "@/lib/types";
 import { useOutsideClick } from "@/hooks/use-outside-click";
 import { useLenisInstance } from "@/hooks/use-lenis-scroll";
-import { getAccentBase } from "@/components/projects/project-card";
+import { getAccentBase } from "@/lib/accent";
 import { cn } from "@/lib/utils";
 
 // ─── animation variants ───────────────────────────────────────────────────────

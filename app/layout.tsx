@@ -174,16 +174,23 @@ const jsonLd = {
       itemListElement: projects.map((project, index) => ({
         "@type": "ListItem",
         position: index + 1,
+        // `url` points at the portfolio's own detail page so Google
+        // crawls us first (and gets richer structured data) before
+        // optionally following through to the live demo via the
+        // CreativeWork.sameAs field.
+        url: `${SITE_URL}/projects/${project.id}`,
         item: {
           "@type": "CreativeWork",
-          "@id": `${SITE_URL}/#project-${project.id}`,
+          "@id": `${SITE_URL}/projects/${project.id}`,
           name: project.title,
           description: project.description,
-          url: project.href ?? SITE_URL,
+          url: `${SITE_URL}/projects/${project.id}`,
           image: project.image ? `${SITE_URL}${project.image}` : undefined,
           author: { "@id": `${SITE_URL}/#person` },
           keywords: project.tags.join(", "),
           codeRepository: project.repo,
+          // Live demo (if any) is a related external resource.
+          sameAs: project.href ? [project.href] : undefined,
         },
       })),
     },

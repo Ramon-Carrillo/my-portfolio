@@ -1,22 +1,22 @@
 import type { MetadataRoute } from "next";
+import { projects } from "@/lib/data";
 
 const SITE_URL = "https://ramoncarrillo.dev";
 
 /**
  * Sitemap for ramoncarrillo.dev.
  *
- * This is a single-page portfolio, so we enumerate the major in-page
- * anchors. Search engines don't index fragment URLs the same as unique
- * pages, but declaring them signals site structure and helps with rich
- * results for "jump links" in the SERP.
+ * Declares:
+ *   - the home page (top priority)
+ *   - in-page section anchors (for jump-link SERPs)
+ *   - one full URL per project detail page
  *
- * `lastModified` uses `new Date()` so every deploy produces a fresh
- * timestamp — acceptable for a portfolio that updates organically.
- * Swap to commit-time if/when precise freshness matters.
+ * Regenerated on every build so `lastModified` reflects deploy time.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  return [
+
+  const home: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
       lastModified: now,
@@ -42,4 +42,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     },
   ];
+
+  const projectPages: MetadataRoute.Sitemap = projects.map((project) => ({
+    url: `${SITE_URL}/projects/${project.id}`,
+    lastModified: now,
+    // Projects are richer case-study pages — worth crawling periodically
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
+  return [...home, ...projectPages];
 }

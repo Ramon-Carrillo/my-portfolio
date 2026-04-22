@@ -1,26 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { ExternalLink } from "lucide-react";
-import { FaGithub } from "react-icons/fa6";
+import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import type { Project } from "@/lib/types";
+import { getAccentBase } from "@/lib/accent";
 import { cn } from "@/lib/utils";
-
-// ─── accent palette ───────────────────────────────────────────────────────────
-// Each value is an OKLCH base string (no alpha). Alpha is applied at usage sites
-// so the same hue can appear at different strengths across the card.
-// Lightness values sit in the 0.52–0.70 range so they stay visible on the
-// deep dark background (oklch 0.07) even at low alpha.
-
-const ACCENT_BASES = [
-  "0.52 0.190 264", // royal blue  — matches design system --royal / --primary
-  "0.65 0.115 292", // soft purple — secondary accent
-  "0.58 0.092 196", // teal / cyan — highlight color
-  "0.58 0.095 262", // cornflower blue
-  "0.37 0.200 297", // deep indigo
-  "0.70 0.080  70", // warm gold   — warm contrast break
-] as const;
 
 /** Build an `oklch(…)` string with an optional % alpha. */
 function o(base: string, alpha?: number) {
@@ -29,21 +15,8 @@ function o(base: string, alpha?: number) {
     : `oklch(${base})`;
 }
 
-/** Deterministic, stable mapping: project id → accent index. */
-export function accentIndex(id: string): number {
-  let h = 0;
-  for (const c of id) h = ((h * 31) + c.charCodeAt(0)) >>> 0;
-  return h % ACCENT_BASES.length;
-}
-
-export function getAccentBase(id: string) {
-  return ACCENT_BASES[accentIndex(id)];
-}
-
 // ─── Framer Motion variants ───────────────────────────────────────────────────
-// Variant propagation: the parent sets `whileHover="hovered"` and ALL children
-// with matching variant keys (`rest` / `hovered`) respond automatically —
-// no useState, no event handlers needed for the child animations.
+// Parent propagates `whileHover="hovered"` to children — no per-child state.
 
 const cardVariants = {
   rest: {
@@ -55,26 +28,19 @@ const cardVariants = {
     transition: {
       duration: 0.35,
       ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
-      // Stagger the icon buttons on enter — first icon at 70 ms, second at 140 ms
-      staggerChildren: 0.07,
     },
   },
 };
 
-const overlayVariants = {
-  rest:    { opacity: 0 },
-  hovered: { opacity: 1, transition: { duration: 0.18 } },
-};
-
-const iconVariants = {
-  rest: { opacity: 0, scale: 0.78, y: 6 },
+const arrowVariants = {
+  rest: { opacity: 0, scale: 0.8, x: -4 },
   hovered: {
     opacity: 1,
     scale: 1,
-    y: 0,
+    x: 0,
     transition: {
       duration: 0.22,
-      ease: [0.34, 1.56, 0.64, 1] as [number, number, number, number], // spring pop
+      ease: [0.34, 1.56, 0.64, 1] as [number, number, number, number],
     },
   },
 };
@@ -83,12 +49,20 @@ const iconVariants = {
 
 interface ProjectCardProps {
   project: Project;
-  onSelect: (project: Project) => void;
   priority?: boolean;
 }
 
-export function ProjectCard({ project, onSelect, priority }: ProjectCardProps) {
-  const base     = getAccentBase(project.id);
+/**
+ * Project card. The whole card is a single `<Link>` to the project's
+ * detail page at `/projects/[slug]`. We intentionally don't render
+ * external links (live demo / GitHub) directly on the card anymore —
+ * those are prominent CTAs on the detail page. This keeps the card
+ * markup clean (no nested anchors) and routes all discovery traffic
+ * through the project page first, which is better for both SEO and
+ * the story that page is meant to tell.
+ */
+export function ProjectCard({ project, priority }: ProjectCardProps) {
+  const base = getAccentBase(project.id);
   const hasLinks = project.href || project.repo;
 
   return (
@@ -96,27 +70,28 @@ export function ProjectCard({ project, onSelect, priority }: ProjectCardProps) {
       variants={cardVariants}
       initial="rest"
       whileHover="hovered"
-      role="button"
-      tabIndex={0}
-      onClick={() => onSelect(project)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onSelect(project);
-        }
-      }}
-      aria-label={`View details for ${project.title}`}
       className={cn(
-        "group cursor-pointer overflow-hidden rounded-xl border border-border bg-card",
+        "group relative overflow-hidden rounded-xl border border-border bg-card",
         "transition-[border-color,box-shadow] duration-300",
         "hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "focus-within:border-primary/50"
       )}
     >
+      {/* Link overlay — `after` pseudo covers the card for one-click nav
+          without nesting anchors. The rest of the card is purely visual. */}
+      <Link
+        href={`/projects/${project.id}`}
+        aria-label={`View case study: ${project.title}`}
+        className={cn(
+          "absolute inset-0 z-10",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          "rounded-xl"
+        )}
+      />
+
       {/* ── Image / decorative placeholder ─────────────────────────────────── */}
       <div className="relative h-44 overflow-hidden">
-
         {/* Layered gradient background */}
         <div
           className="absolute inset-0"
@@ -126,7 +101,7 @@ export function ProjectCard({ project, onSelect, priority }: ProjectCardProps) {
           }}
         />
 
-        {/* Floating decorative circles — each at a different size and position */}
+        {/* Floating decorative circles */}
         <div
           className="absolute -right-8 -top-8 size-32 rounded-full"
           style={{ backgroundColor: o(base, 22) }}
@@ -158,64 +133,24 @@ export function ProjectCard({ project, onSelect, priority }: ProjectCardProps) {
 
         {/* Concept badge — shown when project has no live link or repo */}
         {!hasLinks && (
-          <span className="absolute left-3 top-3 rounded-md bg-background/80 px-2 py-0.5 text-xs font-medium text-muted-foreground backdrop-blur-sm">
+          <span className="absolute left-3 top-3 z-[5] rounded-md bg-background/80 px-2 py-0.5 text-xs font-medium text-muted-foreground backdrop-blur-sm">
             Concept
           </span>
-        )}
-
-        {/* ── Hover overlay — Live Demo + GitHub icons ── */}
-        {hasLinks && (
-          <motion.div
-            variants={overlayVariants}
-            className="pointer-events-none absolute inset-0 flex items-end justify-end gap-2 p-3"
-            style={{
-              background:
-                "linear-gradient(to top, oklch(0 0 0 / 35%) 0%, transparent 55%)",
-            }}
-          >
-            {project.href && (
-              <motion.a
-                variants={iconVariants}
-                href={project.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Live demo — ${project.title}`}
-                onClick={(e) => e.stopPropagation()}
-                className={cn(
-                  "pointer-events-auto inline-flex size-9 items-center justify-center rounded-lg",
-                  "bg-background/90 text-foreground backdrop-blur-sm",
-                  "transition-colors hover:bg-primary hover:text-primary-foreground",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                )}
-              >
-                <ExternalLink className="size-4" aria-hidden="true" />
-              </motion.a>
-            )}
-            {project.repo && (
-              <motion.a
-                variants={iconVariants}
-                href={project.repo}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`GitHub — ${project.title}`}
-                onClick={(e) => e.stopPropagation()}
-                className={cn(
-                  "pointer-events-auto inline-flex size-9 items-center justify-center rounded-lg",
-                  "bg-background/90 text-foreground backdrop-blur-sm",
-                  "transition-colors hover:bg-primary hover:text-primary-foreground",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                )}
-              >
-                <FaGithub size={15} aria-hidden="true" />
-              </motion.a>
-            )}
-          </motion.div>
         )}
       </div>
 
       {/* ── Text content ─────────────────────────────────────────────────── */}
       <div className="p-5">
-        <h3 className="font-semibold text-foreground">{project.title}</h3>
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-semibold text-foreground">{project.title}</h3>
+          <motion.span
+            variants={arrowVariants}
+            aria-hidden="true"
+            className="shrink-0 text-primary"
+          >
+            <ArrowUpRight className="size-4" />
+          </motion.span>
+        </div>
         <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
           {project.description}
         </p>
@@ -236,46 +171,6 @@ export function ProjectCard({ project, onSelect, priority }: ProjectCardProps) {
             </span>
           )}
         </div>
-
-        {/* Mobile links — always visible on touch devices, hidden on desktop where hover overlay takes over */}
-        {hasLinks && (
-          <div className="mt-4 flex gap-2 sm:hidden">
-            {project.href && (
-              <a
-                href={project.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Live demo — ${project.title}`}
-                onClick={(e) => e.stopPropagation()}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5",
-                  "text-xs font-medium text-muted-foreground",
-                  "transition-colors hover:border-primary/50 hover:text-primary",
-                )}
-              >
-                <ExternalLink className="size-3" aria-hidden="true" />
-                Live Demo
-              </a>
-            )}
-            {project.repo && (
-              <a
-                href={project.repo}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`GitHub — ${project.title}`}
-                onClick={(e) => e.stopPropagation()}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5",
-                  "text-xs font-medium text-muted-foreground",
-                  "transition-colors hover:border-primary/50 hover:text-primary",
-                )}
-              >
-                <FaGithub size={12} aria-hidden="true" />
-                GitHub
-              </a>
-            )}
-          </div>
-        )}
       </div>
     </motion.article>
   );
