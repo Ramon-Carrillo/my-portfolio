@@ -1,7 +1,7 @@
 "use client";
 
 import { FaGithub, FaLinkedin } from "react-icons/fa6";
-import { Mail, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const QUICK_LINKS = [
@@ -14,9 +14,6 @@ const SOCIAL_LINKS = [
   { label: "GitHub",   href: "https://github.com/Ramon-Carrillo",           icon: FaGithub   },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/ramon-carrillo/", icon: FaLinkedin },
 ] as const;
-
-// Update this to your real email address
-const EMAIL = "hello@ramoncarrillo.dev";
 
 export function Footer() {
   return (
@@ -35,16 +32,9 @@ export function Footer() {
               Ramon Carrillo
             </a>
             <p className="max-w-[18rem] text-xs leading-relaxed text-muted-foreground">
-              Full-stack developer building clean, accessible, and performant
-              web applications.
+              Production-grade web apps with Next.js, TypeScript, and Claude —
+              all shipped live.
             </p>
-            <a
-              href={`mailto:${EMAIL}`}
-              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-primary"
-            >
-              <Mail className="size-3" aria-hidden="true" />
-              {EMAIL}
-            </a>
           </div>
 
           {/* Quick links */}
