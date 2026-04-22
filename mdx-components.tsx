@@ -84,15 +84,27 @@ const components: MDXComponents = {
   // ── Links ────────────────────────────────────────────────────────
   // Internal `/path` links route through Next.js. External links get
   // target=_blank + rel=noopener.
-  a: ({ href = "", children, ...props }) => {
+  //
+  // If the MDX author passes a custom className (e.g. to render a
+  // button/pill inside a post), their className wins — we don't
+  // clobber it with the default underline-link styling. This is what
+  // lets things like `<a className="bg-primary ...">Live demo</a>`
+  // render as a proper primary button instead of primary-on-primary
+  // underlined text.
+  //
+  // Bare markdown links (`[text](url)`) don't pass className, so they
+  // get our default underlined-primary style.
+  a: ({ href = "", children, className, ...props }) => {
     const isInternal = href.startsWith("/") || href.startsWith("#");
-    const className = cn(
-      "font-medium text-primary underline decoration-primary/30 underline-offset-4",
-      "transition-colors hover:decoration-primary"
-    );
+    const finalClassName =
+      className ??
+      cn(
+        "font-medium text-primary underline decoration-primary/30 underline-offset-4",
+        "transition-colors hover:decoration-primary"
+      );
     if (isInternal) {
       return (
-        <Link href={href} className={className}>
+        <Link href={href} className={finalClassName}>
           {children}
         </Link>
       );
@@ -102,7 +114,7 @@ const components: MDXComponents = {
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className={className}
+        className={finalClassName}
         {...props}
       >
         {children}
