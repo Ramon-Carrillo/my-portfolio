@@ -2,6 +2,30 @@ import type { Project } from "./types";
 
 export const projects: Project[] = [
   {
+    id: "google-maps-rag-assistant",
+    title: "Google Maps RAG Assistant",
+    description:
+      "AI-powered developer support for Google Maps Platform. Every answer is grounded in official documentation with inline citations and a committed eval suite.",
+    longDescription:
+      "A production-grade RAG (Retrieval-Augmented Generation) assistant that answers developer questions about the Maps JavaScript API, Places, Routes, billing, and troubleshooting. Built with Claude Sonnet 4.6, voyage-code-3 embeddings, Neon pgvector, and the Vercel AI SDK. Features a committed 12-question eval suite with an LLM-as-judge scorer — the repo's git history shows a measured v1 → v2 → v3 iteration arc ending at 12/12 on the golden set. Every answer streams inline citations with cosine-similarity scores so users can verify the sources. Informed directly by a year of Tier 1 Google Maps Platform support at HCLTech.",
+    tags: [
+      "Next.js 16",
+      "TypeScript",
+      "Claude Sonnet 4.6",
+      "Vercel AI SDK",
+      "Voyage Embeddings",
+      "Neon Postgres",
+      "pgvector",
+      "RAG",
+      "LLM-as-Judge Evals",
+      "Tailwind CSS",
+      "shadcn/ui",
+    ],
+    image: "/images/google-maps-rag.png",
+    href: "https://google-maps-rag-assistant.vercel.app",
+    repo: "https://github.com/Ramon-Carrillo/google-maps-rag-assistant",
+  },
+  {
     id: "chimneys-plus",
     title: "Chimneys Plus",
     description:
@@ -37,49 +61,4 @@ export const projects: Project[] = [
     href: "https://ecoshop-coral.vercel.app/",
     repo: "https://github.com/Ramon-Carrillo/eco_shop",
   },
-  {
-    id: "ai-task-manager",
-    title: "AI Task Manager",
-    description:
-      "Intelligent task manager with GPT-powered prioritisation, natural language input, and smart scheduling.",
-    longDescription:
-      "An AI-first productivity app that uses OpenAI GPT-4 to parse natural language task input, auto-assign priorities, and suggest optimal scheduling based on deadlines and workload. Built on Next.js with real-time sync via Supabase Realtime. Features drag-and-drop Kanban boards, recurring tasks, and a distraction-free focus mode.",
-    tags: ["Next.js", "React", "TypeScript", "OpenAI GPT-4", "Supabase Realtime", "Tailwind CSS", "Framer Motion", "Zod"],
-    href: undefined,
-    repo: undefined,
-  },
-  {
-    id: "accessible-dashboard",
-    title: "Accessible Analytics Dashboard",
-    description:
-      "WCAG 2.1 AA compliant data-visualisation dashboard — screen-reader-first, keyboard navigable, fully responsive.",
-    longDescription:
-      "A data visualisation dashboard built accessibility-first: every chart has an accessible text summary, all interactions are fully keyboard navigable, and colour palettes pass APCA contrast ratios. Uses Recharts with custom accessible wrappers and aria-live regions for dynamic updates. Audited and certified WCAG 2.1 AA compliant.",
-    tags: ["React", "TypeScript", "Recharts", "Tailwind CSS", "WCAG 2.1 AA", "Accessibility", "ARIA"],
-    href: undefined,
-    repo: undefined,
-  },
-  {
-    id: "social-analytics-tool",
-    title: "Social Analytics Tool",
-    description:
-      "Multi-platform social media analytics with real-time trend detection, unified insights, and automated reports.",
-    longDescription:
-      "A unified analytics platform that aggregates data from X (Twitter), LinkedIn, and Instagram APIs. Features real-time trend detection via a Node.js event-driven pipeline, automated weekly PDF reports, and a customisable metrics dashboard. OAuth integration handles multi-account management across teams and organisations.",
-    tags: ["Next.js", "Node.js", "TypeScript", "Chart.js", "REST APIs", "OAuth 2.0", "PostgreSQL", "PDF Generation"],
-    href: undefined,
-    repo: undefined,
-  },
-  {
-    id: "figma-to-code",
-    title: "Figma-to-Code Workflow Tool",
-    description:
-      "CLI + web tool that converts Figma frames into clean, accessible React components with Tailwind CSS.",
-    longDescription:
-      "A developer tool that uses the Figma REST API to parse design tokens, component structures, and layout constraints, then generates production-quality React + Tailwind CSS code. The CLI supports watch mode for live sync during design handoff. Auto-generates Storybook stories and accessibility annotations derived from Figma's inspection data.",
-    tags: ["Figma API", "TypeScript", "Node.js", "React", "Tailwind CSS", "CLI", "Storybook"],
-    href: undefined,
-    repo: undefined,
-  },
 ];
-
