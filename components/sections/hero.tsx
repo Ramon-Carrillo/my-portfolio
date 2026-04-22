@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { ArrowRight, Mail, ChevronDown } from 'lucide-react'
+import { ArrowRight, Mail, ChevronDown, BookOpen } from 'lucide-react'
 import { HeroCodeDemo } from '@/components/sections/hero-code-demo'
 import { cn } from '@/lib/utils'
 
@@ -92,7 +92,7 @@ export function Hero() {
             </motion.a>
 
             <motion.a
-              href='#contact'
+              href='/blog'
               whileHover={reduced ? undefined : { scale: 1.025 }}
               whileTap={reduced ? undefined : { scale: 0.975 }}
               className={cn(
@@ -102,8 +102,23 @@ export function Hero() {
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 'focus-visible:ring-offset-2 focus-visible:ring-offset-background'
               )}>
+              <BookOpen className='size-4' aria-hidden='true' />
+              Read the blog
+            </motion.a>
+
+            <motion.a
+              href='#contact'
+              whileHover={reduced ? undefined : { scale: 1.025 }}
+              whileTap={reduced ? undefined : { scale: 0.975 }}
+              className={cn(
+                'inline-flex items-center gap-2 rounded-lg px-5 py-2.5',
+                'text-sm font-medium text-muted-foreground',
+                'transition-colors hover:text-foreground',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                'focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+              )}>
               <Mail className='size-4' aria-hidden='true' />
-              Get In Touch
+              Contact
             </motion.a>
 
           </motion.div>

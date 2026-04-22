@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { projects } from "@/lib/data";
+import { getAllPosts } from "@/lib/posts";
 
 const SITE_URL = "https://ramoncarrillo.dev";
 
@@ -51,5 +52,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...home, ...projectPages];
+  const blogPages: MetadataRoute.Sitemap = [
+    {
+      url: `${SITE_URL}/blog`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    ...getAllPosts().map((post) => ({
+      url: `${SITE_URL}/blog/${post.slug}`,
+      // Use post date as lastModified; updatedAt if present, else published
+      lastModified: new Date(
+        (post.updatedAt ?? post.publishedAt) + "T00:00:00Z",
+      ),
+      changeFrequency: "yearly" as const,
+      priority: 0.9,
+    })),
+  ];
+
+  return [...home, ...projectPages, ...blogPages];
 }

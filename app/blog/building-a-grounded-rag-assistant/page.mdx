@@ -1,0 +1,284 @@
+import Link from "next/link";
+import { ArrowLeft, ExternalLink } from "lucide-react";
+import { FaGithub } from "react-icons/fa6";
+import { formatPublishedDate, getPostBySlug } from "@/lib/posts";
+
+export const post = getPostBySlug("building-a-grounded-rag-assistant");
+
+export const metadata = {
+  title: post.title,
+  description: post.excerpt,
+  alternates: {
+    canonical: `https://ramoncarrillo.dev/blog/${post.slug}`,
+  },
+  openGraph: {
+    type: "article",
+    url: `https://ramoncarrillo.dev/blog/${post.slug}`,
+    title: `${post.title} · Ramon Carrillo`,
+    description: post.excerpt,
+    publishedTime: post.publishedAt,
+    authors: ["Ramon Carrillo"],
+    tags: post.tags,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: post.title,
+    description: post.excerpt,
+  },
+};
+
+{/* ───── Back link ───── */}
+
+<Link
+  href="/blog"
+  className="group inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+>
+  <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5" />
+  All posts
+</Link>
+
+{/* ───── Header ───── */}
+
+<header className="mt-8 mb-10 border-b border-border pb-8">
+  <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+    <time dateTime={post.publishedAt}>{formatPublishedDate(post.publishedAt)}</time>
+    <span aria-hidden="true">·</span>
+    <span>{post.readingTime}</span>
+    <span aria-hidden="true">·</span>
+    <span className="rounded-full border bg-card px-2 py-0.5 font-medium">
+      Case study
+    </span>
+  </div>
+
+  <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
+    {post.title}
+  </h1>
+
+  <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+    {post.excerpt}
+  </p>
+
+  <div className="mt-6 flex flex-wrap gap-3">
+    <a
+      href="https://google-maps-rag-assistant.vercel.app"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+    >
+      <ExternalLink className="size-4" />
+      Live demo
+    </a>
+    <a
+      href="https://github.com/Ramon-Carrillo/google-maps-rag-assistant"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary"
+    >
+      <FaGithub size={14} />
+      Source
+    </a>
+    <a
+      href="https://google-maps-rag-assistant.vercel.app/architecture"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary"
+    >
+      Architecture
+    </a>
+  </div>
+</header>
+
+{/* ───── Body ───── */}
+
+## The problem
+
+I spent a year at HCLTech as a Tier 1 Google Maps Platform support engineer. Every day, the same questions came in: *RefererNotAllowedMapError*, *OVER_QUERY_LIMIT*, *how do I migrate off `google.maps.Marker`*, *does the $200 credit still exist*. Most of the answers were in Google's docs — the developers couldn't find them, or got tripped up by outdated Stack Overflow posts that referenced APIs that had been renamed or deprecated.
+
+So I built a RAG chatbot to answer those questions. The promise of RAG — *Retrieval-Augmented Generation* — is that you avoid hallucination by grounding the model's answers in documentation you control. Sounds simple. Took me several major iterations and a fundamental architecture rethink to actually deliver on it.
+
+This is the post-mortem of those iterations. Every score I quote is from a committed eval run in the [repo's `evals/results/` directory](https://github.com/Ramon-Carrillo/google-maps-rag-assistant/tree/main/evals/results). Every prompt version is in the file header of [`system-prompt.md`](https://github.com/Ramon-Carrillo/google-maps-rag-assistant/blob/main/src/lib/prompts/system-prompt.md).
+
+## The baseline: classic single-stage RAG
+
+First pass was textbook. Six Markdown files covering the six most-asked topic areas (billing, deprecations, Maps JS overview, Places, Routes, troubleshooting), chunked at ~800 tokens with 200-token overlap, embedded with `voyage-code-3` (1024-dim), stored in Neon Postgres with `pgvector`. Top-5 cosine retrieval feeding `claude-sonnet-4-6` through the Vercel AI SDK.
+
+```
+user query → embed → match_documents(top 5) → LLM → stream
+```
+
+12 golden questions as the eval suite — happy-path retrieval (9), out-of-scope refusal (2), and one adversarial "Holographic API pricing" question to test hallucination resistance.
+
+I wrote a regex-based scorer for refusals because it was fast. First eval: **7/12 (58%)**.
+
+## The first lesson was about evals, not the model
+
+The 7/12 score looked terrible. I opened the report and started reading the failures. Five of them looked like this:
+
+- **The model's actual answer**: "I can't help with that — weather is outside the scope of Google Maps Platform entirely."
+- **My regex scorer's judgment**: FAIL. The regex was looking for phrases like *"cannot answer"* or *"don't have information,"* and "outside the scope" didn't match any pattern.
+
+The model was behaving correctly. The scorer was wrong.
+
+Replaced the regex with a Claude Haiku LLM judge that uses `generateObject` with a Zod schema. Same answers, same retrievals, new score: **11/12 (92%)**. Not a model improvement — a *scorer* improvement.
+
+> **Lesson:** When you write an eval suite, the scorer is code. Code has bugs. A failing eval doesn't always mean the thing you're measuring is broken — sometimes the measurement itself is broken. Look at the outputs before you tune the prompt.
+
+This is the single most valuable thing I learned on this project, and it's why the `evals/results/` folder has committed runs going back to v1. The git history *is* the audit trail.
+
+## Prompt iteration: v2 → v3 → back to v2
+
+The one remaining failure was q12 (Holographic API). The model said:
+
+> "I don't have enough information in the current documentation to answer this confidently."
+
+Technically correct. But the Haiku judge flagged it: *"The assistant's vague response avoids directly acknowledging that the Holographic API does not exist, instead suggesting the user check official documentation."*
+
+Fair critique. A user asking about a non-existent product is better served by "this isn't a real product" than "check the docs."
+
+I wrote **system-prompt v3** with a new rule: *the canned refusal is a floor, not a ceiling. When the user asks about a product that's not in the corpus at all, explicitly state that and list adjacent products that DO exist.*
+
+Score on v3: **9/12 (75%)**.
+
+v3 broke q10 (*"What's the weather?"*) and q11 (*"How do I deploy Lambda on AWS?"*). The "also list adjacent products" instruction leaked from the adversarial-product case into the genuinely-out-of-scope case. The model was now giving weather questioners a helpful list of Maps Platform APIs it *could* cover — which the judge (correctly) flagged as a too-lengthy refusal.
+
+Reverted v3. Stayed at v2, 11/12. Committed the v3 attempt as a documented experiment in the prompt's header changelog so the learning was visible.
+
+> **Lesson:** Prompt changes have side effects. "Fix the one failing case" almost always also means "test that the seven passing cases still pass." The eval suite isn't just for regressions you caused — it's for regressions your *good ideas* cause.
+
+At this point I had two conclusions:
+1. Prompt iteration was hitting diminishing returns.
+2. The failure mode was really a *retrieval* problem — the corpus didn't have enough signal to let the model give the crisp refusal the judge wanted.
+
+## Growing the corpus made things worse
+
+I ran a structured discovery pass — [demand scout](https://github.com/Ramon-Carrillo/google-maps-rag-assistant/blob/main/.claude/agents/maps-docs-demand-scout.md) looking at Stack Overflow and GitHub issue activity, [taxonomy mapper](https://github.com/Ramon-Carrillo/google-maps-rag-assistant/blob/main/.claude/agents/maps-docs-mapper.md) enumerating Google's official API areas — then cross-referenced the two reports to prioritize new docs. Two batches later, the corpus grew from 6 → 12 files, 13 → 41 chunks. Added real-demand content like `api-key-restrictions.md`, `advanced-markers.md`, `react-nextjs-integration.md`, `route-optimization.md`, `geocoding.md`, `address-validation.md`.
+
+Re-ran evals. Score: **11/15** with three new long-tail questions. The 11/12 on the original set held at 11/12 — but one of the regressions was q12 (Holographic) *coming back*. Again.
+
+The retrieval trace explained it. On a 41-chunk corpus, the adversarial query now matched three billing chunks at 0.55-0.60 cosine similarity. Those chunks weren't *about* Holographic API, but the bi-encoder thought they were close enough. With three "sort of relevant" chunks in context, the model softened from a clean refusal to a hedged one.
+
+> **Lesson:** A bigger corpus is not automatically a better corpus. As density grows, a bi-encoder surfaces more near-matches, and marginal near-matches are actively harmful — they encourage the model to hedge instead of refuse.
+
+## The architecture pivot: hybrid RAG with a cross-encoder
+
+Two independent upgrades shipped together.
+
+### Stage 2: Voyage rerank-2
+
+Bi-encoder embeddings (what we use at retrieval time) are fast but imprecise at the relevance boundary. Cross-encoders — which see the query and candidate side by side — are measurably more accurate. The industry-standard pattern is **two-stage retrieval**:
+
+```
+stage 1: bi-encoder → wide-net top 20 (threshold 0.3)
+stage 2: cross-encoder → precise top 5 (relevance ≥ 0.5)
+```
+
+The wider stage-1 net improves recall. The stage-2 rerank improves precision. Chunks that don't clear the rerank threshold produce an empty context, which triggers the system prompt's refusal rule cleanly.
+
+```ts
+// src/lib/rag/retrieval.ts
+const candidates = await sql`
+  SELECT * FROM match_documents(
+    ${vectorLiteral}::vector(1024),
+    0.3,  // looser threshold pre-rerank
+    20    // wider candidate pool
+  )
+`;
+
+const reranked = await rerankDocuments(query, candidates.map(c => c.content), 5);
+
+return reranked
+  .filter((r) => r.relevance_score >= 0.5)
+  .map((r) => ({ ...candidates[r.index], similarity: r.relevance_score }));
+```
+
+Built in, hit Voyage's free-tier rate limit during evals (shared 3 RPM bucket between embeddings and rerank calls), added graceful fallback to cosine ordering when rerank 429s. In production — where queries arrive sparsely — the reranker runs normally. In bulk eval runs, it degrades to stage-1-only, which is still the baseline we were already shipping.
+
+### The bigger shift: agentic web search
+
+The reranker helps precision, but it doesn't solve the underlying problem: *the corpus is finite, and user questions are not*. Google Maps Platform docs are hundreds of pages across 30+ APIs, and Google updates constantly. No static corpus survives contact with the long tail.
+
+The answer is **hybrid RAG**: curated corpus for common questions (speed, privacy, versioned), live web search for the long tail (always current, no corpus maintenance). This is how Perplexity and ChatGPT's browsing work in production.
+
+Claude's Vercel AI SDK integration has Anthropic's managed `webSearch_20260209` tool built in. No new API key, no separate search provider, domain-restricted so the model can't wander off to Stack Overflow:
+
+```ts
+// src/app/api/chat/route.ts
+const webSearchTool = anthropic.tools.webSearch_20260209({
+  maxUses: 3,
+  allowedDomains: ["developers.google.com", "cloud.google.com"],
+});
+
+const result = streamText({
+  model: anthropic(CHAT_MODEL),
+  system: systemPrompt,
+  messages: modelMessages,
+  tools: { web_search: webSearchTool },
+});
+```
+
+The system prompt got a three-case decision tree:
+
+1. If retrieved chunks cover the question → answer from corpus, cite corpus.
+2. If corpus is weak **but question is in-domain** → call `web_search`, cite web URLs.
+3. If question is out-of-scope entirely → refuse, do NOT search.
+
+First live smoke test I ran was your exact question from a previous conversation: *"Does OVER_QUERY_LIMIT return an HTTP 429 status code?"* — which had previously gotten the "I don't have enough information" refusal.
+
+The new behavior: Claude looked at the corpus, saw it didn't specifically cover HTTP status codes, called `web_search` three times with progressively specific queries, and produced this answer:
+
+> "It depends on the API. For legacy REST APIs like Geocoding and Directions, `OVER_QUERY_LIMIT` comes back as **HTTP 200 with the error status in the JSON/XML body**, not as an HTTP-level error. Newer APIs like Routes and Tile API return actual HTTP 429... \[detailed breakdown follows, with citations to developers.google.com pages]"
+
+That's a correct, cited, nuanced answer to a question the static corpus could never have handled.
+
+## Current eval results
+
+15 golden questions. 11 pass. Specifically:
+
+| Category | Result |
+|---|---|
+| Happy-path retrieval (9 questions) | 7 pass, 2 LLM-judge strictness failures |
+| Out-of-scope refusal (2) | 1 pass, 1 LLM-judge strictness failure |
+| Adversarial (1) | 1 LLM-judge false positive on fabricated-pricing claim |
+| **Long-tail (new, 3)** | **3/3 pass** ← the Track 2 win |
+
+The four failures are all LLM-judge variance rather than hallucinations. I reviewed each answer by hand; none fabricate facts. The real signal is the three long-tail questions — they specifically test questions that the curated corpus *cannot* answer, and they pass because the agentic web search layer works.
+
+Next step here is multi-judge voting (three Haiku judges per question, take the majority) to smooth out the variance. Not blocking.
+
+## The system as it stands
+
+```
+                      user query
+                          │
+            voyage-code-3 embedding
+                          │
+       pgvector match_documents (top 20, cos ≥ 0.3)
+                          │
+     voyage rerank-2 → keep top 5, score ≥ 0.5
+                          │
+           claude-sonnet-4-6 answers …
+                          │
+      ┌───────────────────┴───────────────────┐
+      │ corpus covers it?                      │
+      │   YES  → cite corpus, done             │
+      │   NO, in-domain → call web_search       │
+      │                  ↳ developers.google.com│
+      │                    cloud.google.com     │
+      │                    (max 3 uses)         │
+      │   NO, out-of-scope → refuse, no search  │
+      └─────────────────────────────────────────┘
+```
+
+Deployed on Vercel. Live at [google-maps-rag-assistant.vercel.app](https://google-maps-rag-assistant.vercel.app). Full architecture and design-decisions writeup at [/architecture](https://google-maps-rag-assistant.vercel.app/architecture). [Source is on GitHub](https://github.com/Ramon-Carrillo/google-maps-rag-assistant) — including every eval run, every prompt version, and the five-agent team that maintains the corpus.
+
+## What this was really about
+
+The interesting work wasn't the model or the embeddings. Those were commodity choices. The interesting work was **measurement** — building an eval loop that could distinguish "the model is wrong" from "my scorer is wrong" from "the prompt is wrong" from "the retrieval is wrong." Without that loop, I couldn't have safely iterated on anything.
+
+Every engineering decision on this project has a number attached to it in git. That's the only way I know to keep a RAG system honest — and the only way to tell a reader of the repo that you built something on purpose, not by accident.
+
+{/* ───── Footer ───── */}
+
+<hr />
+
+> Found a gap in the assistant's knowledge? Or a bug? I'd genuinely like to hear about it — [drop me a line](/#contact).

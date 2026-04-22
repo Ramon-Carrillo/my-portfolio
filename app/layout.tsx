@@ -7,6 +7,7 @@ import { SmoothScroll } from "@/components/smooth-scroll";
 import { Navbar } from "@/components/common/navbar";
 import { Footer } from "@/components/common/footer";
 import { projects } from "@/lib/data";
+import { getAllPosts } from "@/lib/posts";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -194,6 +195,28 @@ const jsonLd = {
           // Live demo (if any) is a related external resource.
           sameAs: project.href ? [project.href] : undefined,
         },
+      })),
+    },
+    {
+      "@type": "Blog",
+      "@id": `${SITE_URL}/blog#blog`,
+      url: `${SITE_URL}/blog`,
+      name: "Ramon Carrillo — Blog",
+      description:
+        "Long-form case studies and engineering notes on RAG, Claude, Next.js, and shipping production web apps.",
+      author: { "@id": `${SITE_URL}/#person` },
+      blogPost: getAllPosts().map((post) => ({
+        "@type": "BlogPosting",
+        "@id": `${SITE_URL}/blog/${post.slug}`,
+        headline: post.title,
+        description: post.excerpt,
+        url: `${SITE_URL}/blog/${post.slug}`,
+        datePublished: post.publishedAt,
+        dateModified: post.updatedAt ?? post.publishedAt,
+        author: { "@id": `${SITE_URL}/#person` },
+        keywords: post.tags.join(", "),
+        inLanguage: "en-US",
+        mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
       })),
     },
   ],
