@@ -58,21 +58,26 @@ export const metadata = {
     {post.excerpt}
   </p>
 
-  <div className="mt-6 flex flex-wrap gap-3">
+  <div className="mt-6 flex flex-wrap gap-2">
+    {/* Lead action — same outlined structure as the others so the button
+        row reads as a cohesive group, but the primary-colored icon +
+        left-aligned border accent mark it as the main CTA. Outlined
+        buttons work reliably in both light and dark mode without any
+        text-on-primary contrast problems. */}
     <a
       href="https://google-maps-rag-assistant.vercel.app"
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+      className="group inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/70 hover:bg-primary/10"
     >
-      <ExternalLink className="size-4" />
+      <ExternalLink className="size-4 text-primary" />
       Live demo
     </a>
     <a
       href="https://github.com/Ramon-Carrillo/google-maps-rag-assistant"
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary"
+      className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
     >
       <FaGithub size={14} />
       Source
@@ -81,7 +86,7 @@ export const metadata = {
       href="https://google-maps-rag-assistant.vercel.app/architecture"
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary"
+      className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
     >
       Architecture
     </a>
