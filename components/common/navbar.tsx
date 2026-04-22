@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { FaGithub, FaLinkedin } from 'react-icons/fa6'
@@ -8,11 +9,33 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { useActiveSection } from '@/hooks/use-active-section'
 import { cn } from '@/lib/utils'
 
-const NAV_LINKS = [
-  { label: 'About',    href: '#about',    id: 'about'    },
-  { label: 'Projects', href: '#projects', id: 'projects' },
-  { label: 'Contact',  href: '#contact',  id: 'contact'  },
-] as const
+/**
+ * Primary nav links.
+ *
+ * The `href` values use the absolute-slash form (e.g. `/#about`) so
+ * clicking them from non-home routes (/blog, /projects/[slug], etc.)
+ * navigates home first, then scrolls to the anchor. The short-form
+ * `#about` version only worked when the user was already on /.
+ *
+ * `sectionId` is optional — present for links that correspond to a
+ * scroll-tracked section on the home page (so the nav highlights
+ * match `useActiveSection`). Links without one (Blog) use pathname-
+ * based active matching instead.
+ */
+type NavLink = {
+  label: string
+  href: string
+  sectionId?: 'about' | 'projects' | 'contact'
+  /** Regex matched against pathname for page-based active state. */
+  pathMatch?: RegExp
+}
+
+const NAV_LINKS: NavLink[] = [
+  { label: 'About',    href: '/#about',    sectionId: 'about'    },
+  { label: 'Projects', href: '/#projects', sectionId: 'projects' },
+  { label: 'Blog',     href: '/blog',      pathMatch: /^\/blog/  },
+  { label: 'Contact',  href: '/#contact',  sectionId: 'contact'  },
+]
 
 const SOCIAL_LINKS = [
   { label: 'GitHub',   href: 'https://github.com/Ramon-Carrillo',           icon: FaGithub   },
@@ -21,7 +44,18 @@ const SOCIAL_LINKS = [
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const active = useActiveSection(['hero', 'about', 'projects', 'contact'])
+  const pathname = usePathname()
+  const activeSection = useActiveSection(['hero', 'about', 'projects', 'contact'])
+
+  // Scroll-based active state only applies on the home page. On /blog
+  // or /projects/<slug>, we match by pathname instead.
+  const isHome = pathname === '/'
+
+  function isLinkActive(link: NavLink): boolean {
+    if (link.pathMatch && link.pathMatch.test(pathname)) return true
+    if (link.sectionId && isHome && activeSection === link.sectionId) return true
+    return false
+  }
 
   function handleNavClick() {
     setMobileOpen(false)
@@ -46,7 +80,7 @@ export function Navbar() {
 
         {/* ── Logo ── */}
         <a
-          href='#hero'
+          href='/'
           onClick={handleNavClick}
           className='text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-primary'>
           Ramon Carrillo
@@ -55,17 +89,17 @@ export function Navbar() {
         {/* ── Nav links (desktop) ── */}
         <nav aria-label='Primary navigation' className='hidden sm:block'>
           <ul className='flex items-center gap-7'>
-            {NAV_LINKS.map(({ label, href, id }) => (
-              <li key={href}>
+            {NAV_LINKS.map((link) => (
+              <li key={link.href}>
                 <a
-                  href={href}
+                  href={link.href}
                   className={cn(
                     'text-sm transition-colors',
-                    active === id
+                    isLinkActive(link)
                       ? 'font-medium text-foreground'
                       : 'text-muted-foreground hover:text-foreground',
                   )}>
-                  {label}
+                  {link.label}
                 </a>
               </li>
             ))}
@@ -117,18 +151,18 @@ export function Navbar() {
             className='border-t border-border/40 bg-background/95 backdrop-blur-sm sm:hidden'>
             <nav aria-label='Mobile navigation'>
               <ul className='flex flex-col px-6 py-4'>
-                {NAV_LINKS.map(({ label, href, id }) => (
-                  <li key={href}>
+                {NAV_LINKS.map((link) => (
+                  <li key={link.href}>
                     <a
-                      href={href}
+                      href={link.href}
                       onClick={handleNavClick}
                       className={cn(
                         'flex h-11 items-center text-sm transition-colors',
-                        active === id
+                        isLinkActive(link)
                           ? 'font-medium text-foreground'
                           : 'text-muted-foreground hover:text-foreground',
                       )}>
-                      {label}
+                      {link.label}
                     </a>
                   </li>
                 ))}
