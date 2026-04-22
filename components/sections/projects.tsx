@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { projects } from "@/lib/data";
 import { ProjectsGrid } from "@/components/projects/projects-grid";
+import { FeaturedProject } from "@/components/projects/featured-project";
 
 const FADE_UP = {
   hidden: { opacity: 0, y: 16 },
@@ -20,6 +21,12 @@ const VP = { once: true, margin: "-80px" } as const;
 
 export function Projects() {
   const reduced = useReducedMotion() ?? false;
+
+  // First project (RAG) gets the featured treatment. Everything else
+  // lands in the standard grid below. If projects ever need explicit
+  // ordering/featuring independent of array position, add a `featured:
+  // true` flag to the Project type and filter here.
+  const [featured, ...rest] = projects;
 
   return (
     <section id="projects" className="px-6 py-24">
@@ -39,15 +46,20 @@ export function Projects() {
           <div className="h-px flex-1 bg-border" aria-hidden="true" />
         </motion.div>
 
-        {/* ── Grid ── */}
-        <motion.div
-          initial={reduced ? false : "hidden"}
-          whileInView="show"
-          viewport={VP}
-          variants={FADE_UP}
-        >
-          <ProjectsGrid projects={projects} />
-        </motion.div>
+        {/* ── Featured project ── */}
+        {featured && <FeaturedProject project={featured} />}
+
+        {/* ── Grid of remaining projects ── */}
+        {rest.length > 0 && (
+          <motion.div
+            initial={reduced ? false : "hidden"}
+            whileInView="show"
+            viewport={VP}
+            variants={FADE_UP}
+          >
+            <ProjectsGrid projects={rest} />
+          </motion.div>
+        )}
 
       </div>
     </section>

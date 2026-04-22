@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "@/components/providers";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { Navbar } from "@/components/common/navbar";
@@ -221,6 +223,14 @@ export default function RootLayout({
             <Footer />
           </SmoothScroll>
         </Providers>
+
+        {/* Vercel Analytics — privacy-friendly, cookie-free page-view
+            tracking. Speed Insights collects real-user Core Web Vitals
+            (LCP, INP, CLS) so we can see how the site performs for
+            actual visitors, not just synthetic Lighthouse runs. Both
+            are no-ops in local dev and only report when deployed. */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
