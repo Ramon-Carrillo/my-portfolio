@@ -7,28 +7,22 @@ import { cn } from "@/lib/utils";
 // ─── content ─────────────────────────────────────────────────────────────────
 
 const BIO = [
-  "Hi, I'm Ramon — a passionate full-stack developer focused on building clean, accessible, and performant web applications.",
-  "I love turning ideas into reality using modern technologies like Next.js, React, TypeScript, and Node.js. With a strong eye for UI design and deep attention to accessibility & SEO, I create digital experiences that are both beautiful and user-friendly.",
-  "When I'm not coding, I'm exploring new tools, experimenting with AI, or refining designs in Figma. Always learning, always shipping.",
+  "I'm a full-stack developer who came into engineering from the other side of the support phone. I spent a year at HCLTech as a Tier 1 Google Maps Platform support engineer — every day, I helped developers debug `RefererNotAllowedMapError`, untangle billing credits, and migrate off deprecated APIs.",
+  "That experience shaped how I build. I've seen exactly what breaks in production and how it feels when it does, so I write code with real users in mind: clear error states, grounded AI answers instead of confident hallucinations, citations where they matter, and accessibility treated as a baseline — not a retrofit.",
+  "Today I focus on production-grade web apps with Next.js, TypeScript, and Claude — including RAG systems, AI agents, and Stripe-powered storefronts. Most of my recent work is shipped live with committed eval suites so quality isn't a vibe, it's a number.",
 ] as const;
 
 const STACK = [
   "TypeScript",
-  "React / Next.js",
+  "Next.js / React",
   "Tailwind CSS",
-  "Framer Motion",
   "Node.js",
   "PostgreSQL",
   "Prisma",
   "Stripe",
-  "Supabase",
-  "OpenAI",
-  "Zod",
-  "React Hook Form",
-  "shadcn/ui",
-  "Recharts",
-  "Figma API",
-  "Storybook",
+  "Claude / Anthropic",
+  "Vercel AI SDK",
+  "RAG & pgvector",
   "Accessibility",
 ] as const;
 

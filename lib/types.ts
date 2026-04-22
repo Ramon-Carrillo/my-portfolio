@@ -3,6 +3,13 @@ export interface Project {
   title: string;
   description: string;
   longDescription?: string;
+  /**
+   * Optional 3-5 bullet points of what makes this project noteworthy.
+   * Rendered in the project modal as a "Why it matters" callout.
+   * Use sparingly — only for projects where there's a genuine
+   * differentiator worth highlighting.
+   */
+  highlights?: string[];
   tags: string[];
   image?: string;
   href?: string;

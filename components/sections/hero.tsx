@@ -75,8 +75,9 @@ export function Hero() {
           <motion.p
             variants={FADE_UP}
             className='mb-9 max-w-md text-base leading-relaxed text-muted-foreground'>
-            I build fast, accessible web apps — from polished UIs to
-            production-ready backends.
+            I build production-grade web apps with Next.js, TypeScript, and
+            Claude — grounded AI, Stripe-powered checkouts, and accessible
+            interfaces that actually ship.
           </motion.p>
 
           <motion.div variants={FADE_UP} className='flex flex-wrap gap-3'>

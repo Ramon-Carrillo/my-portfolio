@@ -181,6 +181,31 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
                   {project.longDescription ?? project.description}
                 </p>
 
+                {/* Highlights — "why it matters" callout. Only rendered
+                    for projects that opt in via the `highlights` field,
+                    so less-featured projects stay visually lighter. */}
+                {project.highlights && project.highlights.length > 0 && (
+                  <div className="mt-6 rounded-xl border border-border/60 bg-background/60 p-4">
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">
+                      Why it matters
+                    </h3>
+                    <ul className="space-y-2">
+                      {project.highlights.map((point, i) => (
+                        <li
+                          key={i}
+                          className="flex gap-2.5 text-sm leading-relaxed text-muted-foreground"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="mt-2 inline-block h-1 w-1 shrink-0 rounded-full bg-primary"
+                          />
+                          <span>{point}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 {/* Tech stack badges */}
                 {project.tags.length > 0 && (
                   <div className="mt-5 flex flex-wrap gap-2">

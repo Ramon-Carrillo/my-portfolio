@@ -8,6 +8,13 @@ export const projects: Project[] = [
       "AI-powered developer support for Google Maps Platform. Every answer is grounded in official documentation with inline citations and a committed eval suite.",
     longDescription:
       "A production-grade RAG (Retrieval-Augmented Generation) assistant that answers developer questions about the Maps JavaScript API, Places, Routes, billing, and troubleshooting. Built with Claude Sonnet 4.6, voyage-code-3 embeddings, Neon pgvector, and the Vercel AI SDK. Features a committed 12-question eval suite with an LLM-as-judge scorer — the repo's git history shows a measured v1 → v2 → v3 iteration arc ending at 12/12 on the golden set. Every answer streams inline citations with cosine-similarity scores so users can verify the sources. Informed directly by a year of Tier 1 Google Maps Platform support at HCLTech.",
+    highlights: [
+      "Never hallucinates — adversarial questions (e.g. 'Holographic API pricing') are refused with cited reasoning, not fabricated",
+      "Committed eval suite with LLM-as-judge scoring: v1 (58%) → v2 (33%, regressed) → v2.1 (92%) → v3 (100%)",
+      "Streams retrieved sources as first-class citizens in the UI — users see cosine-similarity scores and snippets per chunk",
+      "Dedicated /architecture page documents the pipeline, stack, and design decisions for engineering readers",
+      "Informed by a year of real Google Maps Platform Tier 1 support experience",
+    ],
     tags: [
       "Next.js 16",
       "TypeScript",
