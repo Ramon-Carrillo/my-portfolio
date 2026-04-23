@@ -39,6 +39,15 @@ export interface Post {
 
 export const posts: Post[] = [
   {
+    slug: "shipping-wcag-aa-checklist",
+    title: "The WCAG 2.1 AA checklist I run on every project",
+    excerpt:
+      "A practical, ordered checklist for shipping accessible Next.js + Tailwind projects — landmarks, skip links, keyboard support, contrast, reflow, and forms — distilled from auditing four live sites in one morning.",
+    publishedAt: "2026-04-22",
+    readingTime: "10 min read",
+    tags: ["Accessibility", "WCAG", "Next.js", "Tailwind", "Frontend"],
+  },
+  {
     slug: "building-a-grounded-rag-assistant",
     title: "Building a grounded RAG assistant",
     excerpt:

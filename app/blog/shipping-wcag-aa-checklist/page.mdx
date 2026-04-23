@@ -1,0 +1,233 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { formatPublishedDate, getPostBySlug } from "@/lib/posts";
+
+export const post = getPostBySlug("shipping-wcag-aa-checklist");
+
+export const metadata = {
+  title: post.title,
+  description: post.excerpt,
+  alternates: {
+    canonical: `https://ramoncarrillo.dev/blog/${post.slug}`,
+  },
+  openGraph: {
+    type: "article",
+    url: `https://ramoncarrillo.dev/blog/${post.slug}`,
+    title: `${post.title} · Ramon Carrillo`,
+    description: post.excerpt,
+    publishedTime: post.publishedAt,
+    authors: ["Ramon Carrillo"],
+    tags: post.tags,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: post.title,
+    description: post.excerpt,
+  },
+};
+
+{/* ───── Back link ───── */}
+
+<Link
+  href="/blog"
+  className="group inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+>
+  <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5" />
+  All posts
+</Link>
+
+{/* ───── Header ───── */}
+
+<header className="mt-8 mb-10 border-b border-border pb-8">
+  <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+    <time dateTime={post.publishedAt}>{formatPublishedDate(post.publishedAt)}</time>
+    <span aria-hidden="true">·</span>
+    <span>{post.readingTime}</span>
+    <span aria-hidden="true">·</span>
+    <span className="rounded-full border bg-card px-2 py-0.5 font-medium">
+      Checklist
+    </span>
+  </div>
+
+  <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
+    {post.title}
+  </h1>
+
+  <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+    {post.excerpt}
+  </p>
+</header>
+
+{/* ───── Body ───── */}
+
+## Why I have a checklist
+
+Every project in my portfolio goes through the same accessibility pass before I call it done. Not because a client asked for it — because I've watched too many "polished" portfolios fall apart the moment you tab through them with a keyboard, or open them on a phone at 200% zoom. A developer portfolio that can't clear WCAG 2.1 AA is a tell: either the author doesn't know the rules, or they know and skipped them.
+
+This post is the actual checklist I ran against four live projects in one sitting — the Google Maps RAG Assistant, this portfolio, a chimney-and-roofing marketing site, and an e-commerce demo. Everything here is something I've shipped a PR for. No theory, no "ideal world" bullets that I don't personally enforce.
+
+WCAG is a big standard, so I'm not going to pretend this covers everything. The goal is **AA conformance on a typical Next.js + Tailwind + shadcn/ui project**. If you ship government work or need Section 508, go deeper. For a portfolio, this checklist is what separates "accessible enough that a screen-reader user can actually use it" from "I added an `alt` tag once."
+
+## Structure: six blocks, roughly in order
+
+I work the list top to bottom because earlier fixes often prevent later ones. If your HTML landmarks are wrong, the skip link you're about to add will jump to the wrong place.
+
+### 1. Landmarks and document structure
+
+The screen-reader user's first action is usually "jump to main content" or "list the landmarks." If your page has five `<div>`s in a trench coat, they're stuck.
+
+- **One `<main>` per page**, with `id="main"` so the skip link can target it.
+- **One `<h1>` per page**, and headings that descend without skipping levels. H1 → H3 is a common mistake with component-library cards.
+- **`<header>`, `<nav>`, `<footer>`** wrap the obvious regions. `<aside>` for sidebars, `<section>` only when it has an accessible name.
+- **`<html lang="en">`** on the root. Missing `lang` is a WCAG 3.1.1 fail that takes ten seconds to fix.
+- **Page titles are unique and descriptive.** Use Next.js's `metadata.title` template so every route reads as `Page — Site`, not just `Site`. Watch for the doubled-title trap where the per-page title already includes the brand *and* the template adds it again.
+
+### 2. Skip link
+
+One of the highest-value fixes per line of code. A skip link lets keyboard users bypass your nav on every page — without it they tab through the same eight menu items on every route.
+
+```tsx
+// app/layout.tsx
+<body>
+  <a
+    href="#main"
+    className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+  >
+    Skip to main content
+  </a>
+  {children}
+</body>
+```
+
+The `sr-only` → `focus:not-sr-only` pattern keeps it hidden until the first Tab press, then it pops into view. Covers **WCAG 2.4.1 Bypass Blocks**.
+
+### 3. Keyboard support
+
+The rule I keep in my head: *if I can do it with the mouse, I must be able to do it with only the keyboard, and I must be able to see where I am at all times.*
+
+- **Tab order is DOM order.** Avoid positive `tabindex` values. `tabindex="0"` to add non-focusable elements to the tab order, `tabindex="-1"` for programmatic focus only.
+- **Interactive elements are real buttons or links.** A `<div onClick>` is not focusable, doesn't fire on Enter/Space, and doesn't announce as a button to a screen reader. If it acts like a button, it's a `<button>`. If it navigates, it's an `<a>`.
+- **Focus-visible ring is *visible*.** The shadcn default `outline-ring/50` is a 50% opacity outline that disappears against light backgrounds. I replace it with a solid 2px ring:
+
+  ```css
+  *:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  ```
+
+  Covers **WCAG 2.4.7 Focus Visible**.
+- **No focus traps** unless you're in a modal and you explicitly want one. If you do, `Escape` must close.
+- **Don't suppress focus on click.** Some designers hide focus rings because they don't like how they look on mouse-click. The `:focus-visible` pseudo-class shows the ring only on keyboard focus — use it.
+
+### 4. Color and contrast
+
+This is where I see the most silent failures. A design looks fine on the designer's calibrated monitor and is unreadable on a cheap laptop screen in a coffee shop.
+
+- **Text contrast ≥ 4.5:1** for body copy, ≥ 3:1 for large text (18pt+ or 14pt bold). **WCAG 1.4.3**.
+- **Muted-foreground shouldn't be too muted.** Tailwind/shadcn's default `muted-foreground` is tuned for its default background. If you customize either token, re-check the ratio.
+- **Borders and inputs need 3:1 contrast** against their adjacent color. **WCAG 1.4.11 Non-text Contrast**. This is the fix I most often ship — default `--border` tokens in a light theme are frequently at L=0.88, which falls below 3:1 against white. Darken to L=0.75 or lower.
+- **Color is never the only signal.** Error states are red *and* have an icon or text. Links are blue *and* underlined (or have another non-color affordance). **WCAG 1.4.1**.
+- **Focus ring color** must have 3:1 contrast against both the component's background *and* the page background. The ring is an adjacent-color contrast check too.
+
+I run real tooling here — `@axe-core/cli`, Chrome Lighthouse, or the excellent Accessible Colors site — not eyeball checks.
+
+### 5. Touch targets and reflow
+
+Mobile accessibility isn't a separate category. It's WCAG.
+
+- **Touch targets are ≥ 44×44px.** Icon-only buttons in nav bars are the usual offender — wrap them in padding so the hit area is a real square. **WCAG 2.5.5 (AAA)** is 44px strictly; AA 2.5.8 is 24px, but I hold to 44 because it's the iOS guideline too.
+- **Reflow works at 320px.** Load the page, open DevTools, set the viewport to 320px wide, and scroll. Any horizontal scrollbar is a **WCAG 1.4.10 Reflow** fail. The common culprit is a fixed-width element — usually a wide table or a code block — that doesn't shrink.
+- **Zoom to 200% still works.** **WCAG 1.4.4**. Text should reflow without clipping. A site with `html { font-size: 16px }` and `rem`-based sizing gets this for free; a site with `px` everywhere might not.
+- **Orientation isn't locked.** **WCAG 1.3.4**. Your site has to work in both portrait and landscape unless there's a hard reason otherwise (a piano app, etc.).
+
+### 6. Forms and live content
+
+Forms are where screen-reader UX either shines or collapses.
+
+- **Every input has a visible `<label>`** associated via `htmlFor`. Placeholder text is not a label.
+- **Error messages are linked to their input** with `aria-describedby`, and `aria-invalid="true"` sets when the input is in an error state.
+- **Required fields are marked** with `required` (the HTML attribute, which also sets `aria-required`) and visually. The asterisk convention is fine, but make sure it has a legend or `aria-label` that announces what it means.
+- **Form submit announces results.** A silent success is an accessibility bug. Use `aria-live="polite"` on a status region, or route to a confirmation page.
+- **Live-updating content uses `aria-live`.** Chat streaming responses, toast notifications, search result counts. `polite` for most things, `assertive` only for genuine interruptions.
+
+## The things that aren't on the list (and why)
+
+I don't check every WCAG AA criterion on every pass. Some I let the framework handle, some I rely on tooling to catch.
+
+- **Alt text on decorative images** — I use `alt=""` by default and add real alt only when the image carries meaning. Lucide icons get `aria-hidden="true"` unless they're the only content of a button, in which case the button needs an `aria-label` and the icon stays decorative.
+- **Captions and transcripts** — I don't ship video content. If I did, this would be the biggest single item.
+- **Timing** — I don't use session timeouts or auto-advancing carousels. If you do, **WCAG 2.2.1** (Timing Adjustable) becomes non-trivial.
+
+## The automation layer
+
+A checklist is only useful if it gets run. I pair manual review with three tools:
+
+1. **`@axe-core/cli`** in CI for the obvious failures (missing `alt`, missing labels, duplicate IDs, bad contrast on static elements).
+2. **Lighthouse** on the deployed preview URL for a rough overall score — the number isn't the goal, but a drop from 100 to 92 is a signal to look.
+3. **Manual keyboard pass**, every time, on every route. Tab through the whole page. Trigger every button and link. Open every modal. Close every modal. This catches everything automated tools can't — focus order bugs, missing focus rings, unexpected focus jumps.
+
+I don't believe in accessibility tooling alone. Axe catches maybe 40% of real issues; the other 60% need a human who understands what the page is trying to do. But the 40% automated check is free once it's set up, and it catches regressions I'd otherwise ship.
+
+## How I apply this to an existing project
+
+When I audit a site that's already live (the common case — Chimneys Plus, EcoShop, Lumina in my portfolio), I do it in a specific order:
+
+1. **Read the DOM first.** Open the deployed page, right-click → Inspect, and just read the HTML structure. Before running any tool, I want to see: is there a `<main>`? One `<h1>`? Meaningful landmarks? If the bones are wrong, fixing contrast is polishing a corpse.
+2. **Tab through the page.** No tools, no screen reader, just Tab. I'm looking for: does the focus ring appear? Does it stay visible? Does tab order match visual order? Where does focus go when I open a modal — and where does it go back to when I close it?
+3. **Run axe** for the static failures — missing alts, missing labels, duplicate IDs.
+4. **Run Lighthouse** for the score and the contrast audit.
+5. **Zoom to 200% and narrow to 320px.** Any horizontal scrollbar? Any clipped text?
+6. **Fix in the same order as this checklist.** Landmarks → skip link → keyboard → contrast → touch → forms.
+
+## A minimal layout.tsx that covers most of the bases
+
+If I were starting a Next.js project from scratch today, the root layout would ship with most of this baked in:
+
+```tsx
+// app/layout.tsx
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body className="min-h-screen antialiased">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+        >
+          Skip to main content
+        </a>
+        <Nav />
+        <main id="main">{children}</main>
+        <Footer />
+      </body>
+    </html>
+  );
+}
+```
+
+Plus this in `globals.css`:
+
+```css
+@layer base {
+  *:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+```
+
+That one file and one CSS block gets you past the three most common WCAG failures in shipped Next.js apps: missing `lang`, missing skip link, and invisible focus rings. Start every project this way and you've done more for accessibility than most portfolios on the internet.
+
+## The real takeaway
+
+Accessibility is not a separate pass. It's part of building the thing. The reason I can run this checklist across four projects in a morning is that most of the boxes were already ticked while I was writing the code the first time — I just double-check them before calling anything done.
+
+If you've never done this pass on one of your own projects: start with the three cheapest, highest-value fixes, in this order.
+
+1. Add `lang="en"` to `<html>` if it isn't there.
+2. Add a skip link.
+3. Replace any faint focus ring with a solid 2px one.
+
+Those three changes take ten minutes and move you from "fails basic checks" to "passes the smoke test." Everything else on this list builds from there.
