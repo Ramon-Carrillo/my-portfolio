@@ -14,6 +14,12 @@ export interface Project {
   image?: string;
   href?: string;
   repo?: string;
+  /**
+   * Optional slug of a blog post that serves as the case study for
+   * this project. When set, renders a "Read the case study" CTA on
+   * the project card and detail page, pointing at /blog/<caseStudySlug>.
+   */
+  caseStudySlug?: string;
 }
 
 export interface Experience {

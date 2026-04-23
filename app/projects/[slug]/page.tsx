@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, BookOpen } from "lucide-react";
 import { FaGithub } from "react-icons/fa6";
 import { projects } from "@/lib/data";
 import { getAccentBase } from "@/lib/accent";
@@ -186,6 +186,21 @@ export default async function ProjectPage({ params }: PageProps) {
                   <ExternalLink className="size-4" aria-hidden="true" />
                   Live demo
                 </a>
+              )}
+              {project.caseStudySlug && (
+                <Link
+                  href={`/blog/${project.caseStudySlug}`}
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/5 px-5 py-2.5",
+                    "text-sm font-medium text-foreground",
+                    "transition-colors hover:border-primary/70 hover:bg-primary/10",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    "focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  )}
+                >
+                  <BookOpen className="size-4 text-primary" aria-hidden="true" />
+                  Read the case study
+                </Link>
               )}
               {project.repo && (
                 <a

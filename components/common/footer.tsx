@@ -4,10 +4,13 @@ import { FaGithub, FaLinkedin } from "react-icons/fa6";
 import { Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// Use absolute-slash form (/#about vs #about) so these anchors work
+// from any route, not just the home page. Matches the navbar.
 const QUICK_LINKS = [
-  { label: "About",    href: "#about"    },
-  { label: "Projects", href: "#projects" },
-  { label: "Contact",  href: "#contact"  },
+  { label: "About",    href: "/#about"    },
+  { label: "Projects", href: "/#projects" },
+  { label: "Blog",     href: "/blog"      },
+  { label: "Contact",  href: "/#contact"  },
 ] as const;
 
 const SOCIAL_LINKS = [

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowUpRight, ExternalLink, Sparkles } from "lucide-react";
+import { ArrowUpRight, ExternalLink, Sparkles, BookOpen } from "lucide-react";
 import { FaGithub } from "react-icons/fa6";
 import type { Project } from "@/lib/types";
 import { getAccentBase } from "@/lib/accent";
@@ -155,6 +155,22 @@ export function FeaturedProject({ project }: FeaturedProjectProps) {
 
           {/* Inline CTAs — above the overlay thanks to z-20 */}
           <div className="relative z-20 mt-6 flex flex-wrap gap-2">
+            {project.caseStudySlug && (
+              <Link
+                href={`/blog/${project.caseStudySlug}`}
+                onClick={(e) => e.stopPropagation()}
+                aria-label={`Read the case study — ${project.title}`}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/5 px-3 py-1.5",
+                  "text-xs font-medium text-foreground",
+                  "transition-colors hover:border-primary/70 hover:bg-primary/10",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                )}
+              >
+                <BookOpen className="size-3 text-primary" aria-hidden="true" />
+                Read the case study
+              </Link>
+            )}
             {project.href && (
               <a
                 href={project.href}
