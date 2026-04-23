@@ -87,14 +87,19 @@ export function Navbar() {
         </a>
 
         {/* ── Nav links (desktop) ── */}
+        {/* Each link gets py-2.5 so its hit area is ≥24×24 px
+            (WCAG 2.2 minimum) — previously the text-only anchors were
+            only 18px tall. aria-current="page" helps screen readers
+            announce the currently-active section. */}
         <nav aria-label='Primary navigation' className='hidden sm:block'>
-          <ul className='flex items-center gap-7'>
+          <ul className='flex items-center gap-5'>
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <a
                   href={link.href}
+                  aria-current={isLinkActive(link) ? 'page' : undefined}
                   className={cn(
-                    'text-sm transition-colors',
+                    'inline-flex items-center px-2 py-2.5 text-sm transition-colors',
                     isLinkActive(link)
                       ? 'font-medium text-foreground'
                       : 'text-muted-foreground hover:text-foreground',
@@ -118,7 +123,10 @@ export function Navbar() {
                 rel='noopener noreferrer'
                 aria-label={label}
                 className='inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground'>
-                <Icon size={14} />
+                {/* aria-hidden on the icon so the accessible name
+                    comes only from the link's aria-label, not read
+                    twice by screen readers. */}
+                <Icon size={14} aria-hidden='true' />
               </a>
             ))}
           </div>
@@ -177,7 +185,7 @@ export function Navbar() {
                     aria-label={label}
                     onClick={handleNavClick}
                     className='inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground'>
-                    <Icon size={16} />
+                    <Icon size={16} aria-hidden='true' />
                   </a>
                 ))}
               </div>

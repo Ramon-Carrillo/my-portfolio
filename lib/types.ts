@@ -12,6 +12,13 @@ export interface Project {
   highlights?: string[];
   tags: string[];
   image?: string;
+  /**
+   * Descriptive alt text for `image`. Falls back to
+   * `"${title} — screenshot"` when absent. Providing a rich alt that
+   * describes what's visible in the screenshot is better for screen
+   * reader users than the generic fallback (WCAG 1.1.1).
+   */
+  imageAlt?: string;
   href?: string;
   repo?: string;
   /**

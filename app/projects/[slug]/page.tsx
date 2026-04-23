@@ -149,7 +149,7 @@ export default async function ProjectPage({ params }: PageProps) {
           {project.image && (
             <Image
               src={project.image}
-              alt={`${project.title} — main screenshot`}
+              alt={project.imageAlt ?? `${project.title} — main screenshot`}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 768px"

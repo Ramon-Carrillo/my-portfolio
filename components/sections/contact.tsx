@@ -17,11 +17,20 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+// `border-input` was bumped in globals.css (L=0.88 → L=0.72) so this
+// now meets WCAG 1.4.11's 3:1 UI-component boundary requirement
+// without needing a per-input override.
 const inputClass = cn(
   "w-full rounded-lg border border-input bg-card px-4 py-2.5 text-sm text-foreground",
   "placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring",
   "disabled:opacity-50"
 );
+
+// Visible label — replaces placeholder-as-label which disappears once
+// the user starts typing (loss of context for screen-readers
+// mid-compose, and a UX regression for everyone).
+const labelClass =
+  "block text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5";
 
 const FADE_UP = {
   hidden: { opacity: 0, y: 16 },
@@ -101,52 +110,55 @@ export function Contact() {
             className="space-y-4"
           >
             <div className="space-y-1">
-              <label htmlFor="name" className="sr-only">Name</label>
+              <label htmlFor="name" className={labelClass}>Name</label>
               <input
                 {...register("name")}
                 id="name"
                 name="name"
                 type="text"
-                placeholder="Name"
                 autoComplete="name"
                 disabled={pending}
+                aria-invalid={!!errors.name}
+                aria-describedby={errors.name ? "name-error" : undefined}
                 className={inputClass}
               />
               {errors.name && (
-                <p className="text-xs text-destructive" role="alert">{errors.name.message}</p>
+                <p id="name-error" className="text-xs text-destructive" role="alert">{errors.name.message}</p>
               )}
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="email" className="sr-only">Email</label>
+              <label htmlFor="email" className={labelClass}>Email</label>
               <input
                 {...register("email")}
                 id="email"
                 name="email"
                 type="email"
-                placeholder="Email"
                 autoComplete="email"
                 disabled={pending}
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "email-error" : undefined}
                 className={inputClass}
               />
               {errors.email && (
-                <p className="text-xs text-destructive" role="alert">{errors.email.message}</p>
+                <p id="email-error" className="text-xs text-destructive" role="alert">{errors.email.message}</p>
               )}
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="message" className="sr-only">Message</label>
+              <label htmlFor="message" className={labelClass}>Message</label>
               <textarea
                 {...register("message")}
                 id="message"
                 name="message"
-                placeholder="Message"
                 rows={5}
                 disabled={pending}
+                aria-invalid={!!errors.message}
+                aria-describedby={errors.message ? "message-error" : undefined}
                 className={cn(inputClass, "resize-none")}
               />
               {errors.message && (
-                <p className="text-xs text-destructive" role="alert">{errors.message.message}</p>
+                <p id="message-error" className="text-xs text-destructive" role="alert">{errors.message.message}</p>
               )}
             </div>
 

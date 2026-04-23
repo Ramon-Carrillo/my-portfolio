@@ -105,7 +105,7 @@ export function FeaturedProject({ project }: FeaturedProjectProps) {
           {project.image && (
             <Image
               src={project.image}
-              alt={`${project.title} screenshot`}
+              alt={project.imageAlt ?? `${project.title} — screenshot`}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"

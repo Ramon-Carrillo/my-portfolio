@@ -85,6 +85,10 @@ export function HeroCodeDemo() {
       initial={reduced ? false : "hidden"}
       animate={reduced ? false : "show"}
       variants={cardV}
+      // `w-full` ensures the card shrinks below its max-w at narrow
+      // viewports. Internal pre/code still scroll horizontally inside
+      // the card via `overflow-x-auto` (allowed by WCAG 1.4.10 for
+      // code content), so the card itself stays within the column.
       className="relative w-full max-w-md"
       aria-label="Code example: a retrieval call from the Google Maps RAG Assistant returning three grounded sources"
     >

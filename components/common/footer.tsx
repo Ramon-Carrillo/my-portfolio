@@ -78,7 +78,7 @@ export function Footer() {
                     "hover:bg-accent hover:text-foreground",
                   )}
                 >
-                  <Icon size={15} />
+                  <Icon size={15} aria-hidden="true" />
                 </a>
               ))}
             </div>

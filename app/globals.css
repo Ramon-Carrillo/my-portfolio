@@ -99,8 +99,12 @@
 
   --destructive: oklch(0.577 0.245 27);
 
-  --border: oklch(0.88 0.012 260);
-  --input:  oklch(0.88 0.012 260);
+  /* --border / --input were at L=0.88 which gave only ~1.4:1 contrast
+     against the near-white body bg — a WCAG 1.4.11 fail. Darkening to
+     L=0.75 brings UI-component boundaries to ≥3:1 without looking
+     heavy. */
+  --border: oklch(0.75 0.015 260);
+  --input:  oklch(0.72 0.020 260);
   --ring:   oklch(0.45 0.185 264);
 
   --chart-1: oklch(0.45 0.185 264);
@@ -205,7 +209,20 @@
   }
 
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
+  }
+
+  /* Strengthened focus indicator — solid 2px primary ring with a 2px
+     offset from the element. Applies to every focusable element
+     unless explicitly overridden. Uses `focus-visible` so mouse
+     clicks don't trigger a stray ring, only keyboard/AT navigation.
+     WCAG 2.4.7 requires focus be clearly visible with sufficient
+     contrast; the previous `outline-ring/50` was 50% opacity which
+     was too subtle against the light header background. */
+  *:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 
   body {

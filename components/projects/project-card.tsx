@@ -123,7 +123,7 @@ export function ProjectCard({ project, priority }: ProjectCardProps) {
         {project.image && (
           <Image
             src={project.image}
-            alt={`${project.title} screenshot`}
+            alt={project.imageAlt ?? `${project.title} — screenshot`}
             fill
             className="object-cover"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

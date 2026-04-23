@@ -46,17 +46,30 @@ export function Hero() {
           animate='show'
           className='max-w-xl'>
 
+          {/*
+            "Hello, I'm" label: previously used `text-primary` which at
+            14px failed WCAG 1.4.3 against the dark hero gradient
+            (~3.5:1, below the 4.5:1 required for small text).
+            Switched to a lighter tint with higher luminance so it
+            reads without changing the visual hierarchy.
+          */}
           <motion.p
             variants={FADE_UP}
-            className='mb-3 text-sm font-medium uppercase tracking-widest text-primary'>
+            className='mb-3 text-sm font-medium uppercase tracking-widest text-primary-foreground/75'>
             Hello, I&apos;m
           </motion.p>
 
+          {/*
+            Name sizes: previously `text-7xl sm:text-8xl` which made
+            "Ramon" ~72px at 320px viewport — overflowed the hero
+            column. Progressive scale so small phones get a readable
+            size that fits.
+          */}
           <motion.h1
             variants={FADE_UP}
             className='mb-3 font-bold leading-none tracking-tight text-foreground'>
-            <span className='block text-7xl sm:text-8xl'>Ramon</span>
-            <span className='block text-5xl font-light text-muted-foreground sm:text-6xl'>
+            <span className='block text-6xl sm:text-7xl md:text-8xl'>Ramon</span>
+            <span className='block text-4xl font-light text-muted-foreground sm:text-5xl md:text-6xl'>
               Carrillo
             </span>
           </motion.h1>

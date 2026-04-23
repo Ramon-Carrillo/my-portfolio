@@ -30,6 +30,8 @@ export const projects: Project[] = [
       "shadcn/ui",
     ],
     image: "/images/google-maps-rag.png",
+    imageAlt:
+      "Google Maps RAG Assistant landing page showing a chat interface with suggestion chips for Routes, Places, Billing, Debugging, Deprecations, and Getting Started categories.",
     href: "https://google-maps-rag-assistant.vercel.app",
     repo: "https://github.com/Ramon-Carrillo/google-maps-rag-assistant",
     caseStudySlug: "building-a-grounded-rag-assistant",
