@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { projects } from "@/lib/data";
 import { ProjectsGrid } from "@/components/projects/projects-grid";
 import { FeaturedProject } from "@/components/projects/featured-project";
+import { useT } from "@/components/locale-provider";
 
 const FADE_UP = {
   hidden: { opacity: 0, y: 16 },
@@ -20,6 +21,7 @@ const FADE_UP = {
 const VP = { once: true, margin: "-80px" } as const;
 
 export function Projects() {
+  const t = useT();
   const reduced = useReducedMotion() ?? false;
 
   // First project (RAG) gets the featured treatment. Everything else
@@ -41,7 +43,7 @@ export function Projects() {
           className="mb-12 flex items-center gap-4"
         >
           <h2 className="text-3xl font-bold tracking-tight text-foreground">
-            Projects
+            {t.projects.heading}
           </h2>
           <div className="h-px flex-1 bg-border" aria-hidden="true" />
         </motion.div>

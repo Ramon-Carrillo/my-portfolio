@@ -6,6 +6,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, ExternalLink, Sparkles, BookOpen } from "lucide-react";
 import { FaGithub } from "react-icons/fa6";
 import type { Project } from "@/lib/types";
+import { localizeProject } from "@/lib/i18n";
+import { useLocale, useT } from "@/components/locale-provider";
 import { getAccentBase } from "@/lib/accent";
 import { cn } from "@/lib/utils";
 
@@ -20,15 +22,6 @@ function o(base: string, alpha?: number) {
  * hero-style layout above the regular projects grid. Used to draw
  * attention to the strongest case study (currently the Google Maps
  * RAG Assistant).
- *
- * Structure differs from the regular ProjectCard in a few deliberate ways:
- *   - Two-column layout on desktop (image | text) to give more room
- *     for a long description and inline CTAs.
- *   - Dedicated "Featured case study" badge with an icon.
- *   - External links (live demo + repo) are inline buttons, not
- *     hover-only icons — discoverable at a glance.
- *   - Whole card is still a single Link to the detail page via an
- *     `inset-0` overlay; the inline CTAs sit above it with z-20.
  */
 
 const FADE_UP = {
@@ -50,6 +43,9 @@ interface FeaturedProjectProps {
 }
 
 export function FeaturedProject({ project }: FeaturedProjectProps) {
+  const locale = useLocale();
+  const t = useT();
+  const localized = localizeProject(project, locale);
   const reduced = useReducedMotion() ?? false;
   const base = getAccentBase(project.id);
 
@@ -68,7 +64,7 @@ export function FeaturedProject({ project }: FeaturedProjectProps) {
       {/* Link overlay — covers the whole card for one-click nav */}
       <Link
         href={`/projects/${project.id}`}
-        aria-label={`View case study: ${project.title}`}
+        aria-label={`${t.projects.viewCaseStudyAria}: ${localized.title}`}
         className={cn(
           "absolute inset-0 z-10",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -102,10 +98,10 @@ export function FeaturedProject({ project }: FeaturedProjectProps) {
             style={{ backgroundColor: o(base, 16) }}
           />
 
-          {project.image && (
+          {localized.image && (
             <Image
-              src={project.image}
-              alt={project.imageAlt ?? `${project.title} — screenshot`}
+              src={localized.image}
+              alt={localized.imageAlt ?? `${localized.title} — ${t.projects.screenshotFallback}`}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -119,12 +115,12 @@ export function FeaturedProject({ project }: FeaturedProjectProps) {
           {/* Featured badge */}
           <div className="mb-4 inline-flex items-center gap-2 self-start rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-primary">
             <Sparkles className="size-3" aria-hidden="true" />
-            Featured case study
+            {t.projects.featuredBadge}
           </div>
 
           <div className="flex items-start justify-between gap-3">
             <h3 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              {project.title}
+              {localized.title}
             </h3>
             <ArrowUpRight
               className="size-5 shrink-0 text-primary opacity-60 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
@@ -133,12 +129,12 @@ export function FeaturedProject({ project }: FeaturedProjectProps) {
           </div>
 
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            {project.description}
+            {localized.description}
           </p>
 
           {/* Tech tags — show up to 6 on featured (vs 4 on regular card) */}
           <ul className="mt-5 flex flex-wrap gap-1.5">
-            {project.tags.slice(0, 6).map((tag) => (
+            {localized.tags.slice(0, 6).map((tag) => (
               <li
                 key={tag}
                 className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
@@ -146,20 +142,20 @@ export function FeaturedProject({ project }: FeaturedProjectProps) {
                 {tag}
               </li>
             ))}
-            {project.tags.length > 6 && (
+            {localized.tags.length > 6 && (
               <li className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                +{project.tags.length - 6}
+                +{localized.tags.length - 6}
               </li>
             )}
           </ul>
 
           {/* Inline CTAs — above the overlay thanks to z-20 */}
           <div className="relative z-20 mt-6 flex flex-wrap gap-2">
-            {project.caseStudySlug && (
+            {localized.caseStudySlug && (
               <Link
-                href={`/blog/${project.caseStudySlug}`}
+                href={`/blog/${localized.caseStudySlug}`}
                 onClick={(e) => e.stopPropagation()}
-                aria-label={`Read the case study — ${project.title}`}
+                aria-label={`${t.projects.readCaseStudyAria} — ${localized.title}`}
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/5 px-3 py-1.5",
                   "text-xs font-medium text-foreground",
@@ -168,16 +164,16 @@ export function FeaturedProject({ project }: FeaturedProjectProps) {
                 )}
               >
                 <BookOpen className="size-3 text-primary" aria-hidden="true" />
-                Read the case study
+                {t.projects.readCaseStudy}
               </Link>
             )}
-            {project.href && (
+            {localized.href && (
               <a
-                href={project.href}
+                href={localized.href}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                aria-label={`Live demo — ${project.title}`}
+                aria-label={`${t.projects.liveDemoAria} — ${localized.title}`}
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5",
                   "text-xs font-medium text-muted-foreground",
@@ -186,16 +182,16 @@ export function FeaturedProject({ project }: FeaturedProjectProps) {
                 )}
               >
                 <ExternalLink className="size-3" aria-hidden="true" />
-                Live demo
+                {t.projects.liveDemo}
               </a>
             )}
-            {project.repo && (
+            {localized.repo && (
               <a
-                href={project.repo}
+                href={localized.repo}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                aria-label={`Source code — ${project.title}`}
+                aria-label={`${t.projects.sourceAria} — ${localized.title}`}
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5",
                   "text-xs font-medium text-muted-foreground",
@@ -204,7 +200,7 @@ export function FeaturedProject({ project }: FeaturedProjectProps) {
                 )}
               >
                 <FaGithub size={12} aria-hidden="true" />
-                Source
+                {t.projects.source}
               </a>
             )}
           </div>

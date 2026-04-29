@@ -1,21 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { motion, useReducedMotion } from "framer-motion";
 import { sendContactEmail } from "@/app/actions/contact";
+import { useLocale, useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
 
-const schema = z.object({
-  name: z.string().min(1, "Name is required").max(100),
-  email: z.string().email("Invalid email address"),
-  message: z.string().min(10, "Message must be at least 10 characters").max(5000),
-});
-
-type FormValues = z.infer<typeof schema>;
+interface FormValues {
+  name: string;
+  email: string;
+  message: string;
+}
 
 // `border-input` was bumped in globals.css (L=0.88 → L=0.72) so this
 // now meets WCAG 1.4.11's 3:1 UI-component boundary requirement
@@ -47,8 +46,25 @@ const FADE_UP = {
 const VP = { once: true, margin: "-80px" } as const;
 
 export function Contact() {
+  const t = useT();
+  const locale = useLocale();
   const reduced = useReducedMotion() ?? false;
   const [pending, setPending] = useState(false);
+
+  // Recompute the schema when the locale changes so validation
+  // messages render in the active language.
+  const schema = useMemo(
+    () =>
+      z.object({
+        name: z.string().min(1, t.contact.validation.nameRequired).max(100),
+        email: z.string().email(t.contact.validation.emailInvalid),
+        message: z
+          .string()
+          .min(10, t.contact.validation.messageMin)
+          .max(5000),
+      }),
+    [t],
+  );
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -62,15 +78,16 @@ export function Contact() {
       formData.append("name", data.name);
       formData.append("email", data.email);
       formData.append("message", data.message);
+      formData.append("locale", locale);
       const result = await sendContactEmail(null, formData);
       if (result.success) {
-        toast.success("Message sent! I'll get back to you soon.");
+        toast.success(t.contact.successToast);
         reset();
       } else {
         toast.error(result.error);
       }
     } catch {
-      toast.error("Failed to send message. Please try again.");
+      toast.error(t.contact.genericError);
     } finally {
       setPending(false);
     }
@@ -89,7 +106,7 @@ export function Contact() {
           className="mb-12 flex items-center gap-4"
         >
           <h2 className="text-3xl font-bold tracking-tight text-foreground">
-            Contact
+            {t.contact.heading}
           </h2>
           <div className="h-px flex-1 bg-border" aria-hidden="true" />
         </motion.div>
@@ -102,7 +119,7 @@ export function Contact() {
           className="space-y-8"
         >
           <p className="text-muted-foreground">
-            Have a project in mind or just want to say hello?
+            {t.contact.leadIn}
           </p>
 
           <form
@@ -110,7 +127,7 @@ export function Contact() {
             className="space-y-4"
           >
             <div className="space-y-1">
-              <label htmlFor="name" className={labelClass}>Name</label>
+              <label htmlFor="name" className={labelClass}>{t.contact.name}</label>
               <input
                 {...register("name")}
                 id="name"
@@ -128,7 +145,7 @@ export function Contact() {
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="email" className={labelClass}>Email</label>
+              <label htmlFor="email" className={labelClass}>{t.contact.email}</label>
               <input
                 {...register("email")}
                 id="email"
@@ -146,7 +163,7 @@ export function Contact() {
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="message" className={labelClass}>Message</label>
+              <label htmlFor="message" className={labelClass}>{t.contact.message}</label>
               <textarea
                 {...register("message")}
                 id="message"
@@ -167,7 +184,7 @@ export function Contact() {
               disabled={pending}
               className="rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 cursor-pointer"
             >
-              {pending ? "Sending…" : "Send message"}
+              {pending ? t.contact.sending : t.contact.send}
             </button>
           </form>
         </motion.div>

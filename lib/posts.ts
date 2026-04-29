@@ -14,46 +14,35 @@
  *   3. Add an entry to the `posts` array below
  */
 
-export interface Post {
-  /** URL slug — must match the folder name under app/blog/. */
-  slug: string;
-  /** Full post title. */
-  title: string;
-  /** One- or two-sentence summary for the index page and SEO. */
-  excerpt: string;
-  /** ISO 8601 date (YYYY-MM-DD). */
-  publishedAt: string;
-  /** Optional: last substantive update date. */
-  updatedAt?: string;
-  /** Human-readable reading estimate (e.g., "12 min read"). */
-  readingTime: string;
-  /** Short tags shown on the index card and used in JSON-LD keywords. */
-  tags: string[];
-  /**
-   * Optional: the project this post is a case study for. Lets us render
-   * a "Case study for: <project>" chip on the index card and link back
-   * to the project page.
-   */
-  projectSlug?: string;
-}
+import type { Post } from "./types";
+
+export type { Post };
 
 export const posts: Post[] = [
   {
     slug: "shipping-wcag-aa-checklist",
     title: "The WCAG 2.1 AA checklist I run on every project",
+    title_es: "La checklist WCAG 2.1 AA que aplico en cada proyecto",
     excerpt:
       "A practical, ordered checklist for shipping accessible Next.js + Tailwind projects — landmarks, skip links, keyboard support, contrast, reflow, and forms — distilled from auditing four live sites in one morning.",
+    excerpt_es:
+      "Una checklist práctica y ordenada para enviar proyectos accesibles con Next.js + Tailwind — landmarks, skip links, soporte de teclado, contraste, reflujo y formularios — destilada tras auditar cuatro sitios en una mañana.",
     publishedAt: "2026-04-22",
     readingTime: "10 min read",
+    readingTime_es: "10 min de lectura",
     tags: ["Accessibility", "WCAG", "Next.js", "Tailwind", "Frontend"],
   },
   {
     slug: "building-a-grounded-rag-assistant",
     title: "Building a grounded RAG assistant",
+    title_es: "Construyendo un asistente RAG con fundamento",
     excerpt:
       "What it took to build a Google Maps RAG chatbot that doesn't hallucinate — eval-driven iteration, two-stage retrieval, and the pivot to hybrid RAG with agentic web search.",
+    excerpt_es:
+      "Lo que hizo falta para construir un chatbot RAG sobre Google Maps que no alucina — iteración guiada por evaluaciones, recuperación en dos etapas y el giro hacia RAG híbrido con búsqueda web agéntica.",
     publishedAt: "2026-04-22",
     readingTime: "12 min read",
+    readingTime_es: "12 min de lectura",
     tags: ["RAG", "Claude", "Evals", "Next.js", "pgvector"],
     projectSlug: "google-maps-rag-assistant",
   },

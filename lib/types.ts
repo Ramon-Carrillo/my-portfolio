@@ -27,6 +27,15 @@ export interface Project {
    * the project card and detail page, pointing at /blog/<caseStudySlug>.
    */
   caseStudySlug?: string;
+
+  // Spanish (Mexican) translations. Optional so the data layer can be
+  // filled in incrementally — `localizeProject` falls back to the
+  // English field when a `_es` value is missing.
+  title_es?: string;
+  description_es?: string;
+  longDescription_es?: string;
+  highlights_es?: string[];
+  imageAlt_es?: string;
 }
 
 export interface Experience {
@@ -39,4 +48,32 @@ export interface Experience {
 export interface Skill {
   name: string;
   category: "frontend" | "backend" | "tools" | "other";
+}
+
+export interface Post {
+  /** URL slug — must match the folder name under app/blog/. */
+  slug: string;
+  /** Full post title. */
+  title: string;
+  /** One- or two-sentence summary for the index page and SEO. */
+  excerpt: string;
+  /** ISO 8601 date (YYYY-MM-DD). */
+  publishedAt: string;
+  /** Optional: last substantive update date. */
+  updatedAt?: string;
+  /** Human-readable reading estimate (e.g., "12 min read"). */
+  readingTime: string;
+  /** Short tags shown on the index card and used in JSON-LD keywords. */
+  tags: string[];
+  /**
+   * Optional: the project this post is a case study for. Lets us render
+   * a "Case study for: <project>" chip on the index card and link back
+   * to the project page.
+   */
+  projectSlug?: string;
+
+  // Spanish (Mexican) translations.
+  title_es?: string;
+  excerpt_es?: string;
+  readingTime_es?: string;
 }

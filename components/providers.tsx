@@ -1,11 +1,20 @@
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
+import { LocaleProvider } from "@/components/locale-provider";
+import type { Locale } from "@/lib/i18n";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+interface ProvidersProps {
+  initialLocale: Locale;
+  children: React.ReactNode;
+}
+
+export function Providers({ initialLocale, children }: ProvidersProps) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
-      {children}
-      <Toaster richColors />
+      <LocaleProvider initialLocale={initialLocale}>
+        {children}
+        <Toaster richColors />
+      </LocaleProvider>
     </ThemeProvider>
   );
 }

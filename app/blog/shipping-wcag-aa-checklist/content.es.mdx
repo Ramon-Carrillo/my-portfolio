@@ -1,0 +1,171 @@
+## Por qué tengo una checklist
+
+Cada proyecto en mi portafolio pasa por la misma revisión de accesibilidad antes de que lo dé por terminado. No porque un cliente lo haya pedido — porque he visto demasiados portafolios "pulidos" caerse a pedazos en cuanto los recorres con teclado, o los abres en un celular con zoom al 200%. Un portafolio de desarrollador que no pasa WCAG 2.1 AA es una señal clara: o el autor no conoce las reglas, o las conoce y las saltó.
+
+Este post es la checklist real que apliqué a cuatro proyectos en vivo en una sentada — el Google Maps RAG Assistant, este portafolio, un sitio de marketing de chimeneas y techos, y un demo de e-commerce. Todo lo que está aquí es algo por lo que yo mismo he enviado un PR. Sin teoría, sin viñetas de "mundo ideal" que yo mismo no aplique.
+
+WCAG es un estándar grande, así que no voy a pretender que esto cubre todo. La meta es **conformidad AA en un proyecto típico de Next.js + Tailwind + shadcn/ui**. Si estás haciendo trabajo de gobierno o necesitas Section 508, profundiza más. Para un portafolio, esta checklist es lo que separa "lo suficientemente accesible para que un usuario de lector de pantalla realmente pueda usarlo" de "le agregué una etiqueta `alt` una vez."
+
+## Estructura: seis bloques, más o menos en orden
+
+Trabajo la lista de arriba hacia abajo porque arreglos tempranos suelen prevenir los siguientes. Si tus landmarks de HTML están mal, el skip link que estás a punto de agregar va a saltar al lugar equivocado.
+
+### 1. Landmarks y estructura del documento
+
+La primera acción de un usuario de lector de pantalla suele ser "saltar al contenido principal" o "listar los landmarks." Si tu página tiene cinco `<div>`s en una gabardina, se quedan atorados.
+
+- **Un `<main>` por página**, con `id="main"` para que el skip link pueda apuntar ahí.
+- **Un `<h1>` por página**, y encabezados que descienden sin saltar niveles. H1 → H3 es un error común con las cards de las component libraries.
+- **`<header>`, `<nav>`, `<footer>`** envuelven las regiones obvias. `<aside>` para sidebars, `<section>` solo cuando tiene un nombre accesible.
+- **`<html lang="en">`** en la raíz. Que falte el `lang` es un fallo de WCAG 3.1.1 que se arregla en diez segundos.
+- **Los títulos de página son únicos y descriptivos.** Usa la plantilla `metadata.title` de Next.js para que cada ruta se lea como `Página — Sitio`, no solo `Sitio`. Cuídate de la trampa del título duplicado, donde el título de la página ya incluye la marca *y* la plantilla la agrega de nuevo.
+
+### 2. Skip link
+
+Uno de los arreglos con mayor relación valor-por-línea-de-código. Un skip link permite a usuarios de teclado saltarse tu navegación en cada página — sin él, recorren los mismos ocho ítems del menú en cada ruta.
+
+```tsx
+// app/layout.tsx
+<body>
+  <a
+    href="#main"
+    className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+  >
+    Saltar al contenido principal
+  </a>
+  {children}
+</body>
+```
+
+El patrón `sr-only` → `focus:not-sr-only` lo mantiene oculto hasta el primer Tab, y entonces aparece. Cubre **WCAG 2.4.1 Bypass Blocks**.
+
+### 3. Soporte de teclado
+
+La regla que tengo en la cabeza: *si puedo hacerlo con el mouse, debo poder hacerlo solo con el teclado, y debo poder ver dónde estoy en todo momento.*
+
+- **El orden de tab es el orden del DOM.** Evita valores positivos de `tabindex`. `tabindex="0"` para agregar elementos no-focuseables al orden de tab; `tabindex="-1"` solo para focus programático.
+- **Los elementos interactivos son botones o links de verdad.** Un `<div onClick>` no es focuseable, no dispara con Enter/Space y no se anuncia como botón al lector de pantalla. Si actúa como botón, es un `<button>`. Si navega, es un `<a>`.
+- **El anillo de focus-visible es *visible*.** El default de shadcn `outline-ring/50` es un outline al 50% de opacidad que desaparece sobre fondos claros. Lo reemplazo con un anillo sólido de 2px:
+
+  ```css
+  *:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  ```
+
+  Cubre **WCAG 2.4.7 Focus Visible**.
+- **Sin trampas de focus** a menos que estés en un modal y explícitamente las quieras. Si las usas, `Escape` debe cerrar.
+- **No suprimas el focus al hacer click.** Algunos diseñadores ocultan los anillos de focus porque no les gustan al hacer click con mouse. La pseudo-clase `:focus-visible` muestra el anillo solo en focus por teclado — úsala.
+
+### 4. Color y contraste
+
+Aquí es donde veo más fallos silenciosos. Un diseño se ve bien en el monitor calibrado del diseñador y es ilegible en una laptop barata en una cafetería.
+
+- **Contraste de texto ≥ 4.5:1** para texto de cuerpo, ≥ 3:1 para texto grande (18pt+ o 14pt en negritas). **WCAG 1.4.3**.
+- **El muted-foreground no debería estar demasiado apagado.** El `muted-foreground` default de Tailwind/shadcn está afinado para su fondo default. Si personalizas cualquiera de los dos tokens, vuelve a verificar la razón de contraste.
+- **Bordes y inputs necesitan 3:1 de contraste** contra su color adyacente. **WCAG 1.4.11 Non-text Contrast**. Este es el arreglo que más seguido envío — los tokens `--border` default en un tema claro suelen estar en L=0.88, lo cual cae debajo del 3:1 contra blanco. Oscurece a L=0.75 o menos.
+- **El color nunca es la única señal.** Los estados de error son rojos *y* tienen un ícono o texto. Los links son azules *y* subrayados (o tienen otra señal no-cromática). **WCAG 1.4.1**.
+- **El color del anillo de focus** debe tener 3:1 de contraste tanto contra el fondo del componente *como* contra el fondo de la página. El anillo también es un check de contraste contra color adyacente.
+
+Aquí uso herramientas reales — `@axe-core/cli`, Lighthouse de Chrome o el excelente sitio Accessible Colors — no checks a ojo.
+
+### 5. Touch targets y reflujo
+
+La accesibilidad móvil no es una categoría aparte. Es WCAG.
+
+- **Los touch targets son ≥ 44×44px.** Los botones solo-de-ícono en barras de navegación son los culpables habituales — envuélvelos en padding para que el área de hit sea un cuadrado real. **WCAG 2.5.5 (AAA)** son 44px estrictos; AA 2.5.8 son 24px, pero yo me apego a 44 porque también es la guía de iOS.
+- **El reflujo funciona a 320px.** Carga la página, abre DevTools, fija el viewport a 320px de ancho y haz scroll. Cualquier scrollbar horizontal es un fallo de **WCAG 1.4.10 Reflow**. El culpable común es un elemento con ancho fijo — usualmente una tabla ancha o un bloque de código — que no se encoge.
+- **El zoom al 200% sigue funcionando.** **WCAG 1.4.4**. El texto debe refluir sin recortarse. Un sitio con `html { font-size: 16px }` y dimensionado por `rem` lo obtiene gratis; uno con `px` por todos lados puede que no.
+- **La orientación no está bloqueada.** **WCAG 1.3.4**. Tu sitio tiene que funcionar en retrato y en paisaje, salvo que haya una razón fuerte para lo contrario (una app de piano, etc.).
+
+### 6. Formularios y contenido en vivo
+
+Los formularios son donde la UX para lectores de pantalla brilla o se desploma.
+
+- **Cada input tiene un `<label>` visible** asociado vía `htmlFor`. El placeholder no es un label.
+- **Los mensajes de error están vinculados a su input** con `aria-describedby`, y `aria-invalid="true"` se setea cuando el input está en estado de error.
+- **Los campos requeridos están marcados** con `required` (el atributo HTML, que también pone `aria-required`) y visualmente. La convención del asterisco está bien, pero asegúrate de que tenga una leyenda o `aria-label` que anuncie qué significa.
+- **El submit del formulario anuncia resultados.** Un éxito silencioso es un bug de accesibilidad. Usa `aria-live="polite"` en una región de estatus, o redirige a una página de confirmación.
+- **El contenido que se actualiza en vivo usa `aria-live`.** Respuestas de chat en streaming, notificaciones toast, contadores de resultados de búsqueda. `polite` para la mayoría de las cosas, `assertive` solo para interrupciones genuinas.
+
+## Las cosas que no están en la lista (y por qué)
+
+No reviso cada criterio de WCAG AA en cada pasada. Algunos los dejo al framework, otros los confío a las herramientas.
+
+- **Alt text en imágenes decorativas** — uso `alt=""` por default y agrego un alt real solo cuando la imagen carga significado. Los íconos de Lucide llevan `aria-hidden="true"` salvo que sean el único contenido de un botón, en cuyo caso el botón necesita un `aria-label` y el ícono se queda decorativo.
+- **Subtítulos y transcripciones** — no envío contenido de video. Si lo hiciera, sería el ítem más grande de la lista.
+- **Timing** — no uso timeouts de sesión ni carruseles que avanzan solos. Si los usas, **WCAG 2.2.1** (Timing Adjustable) se vuelve no trivial.
+
+## La capa de automatización
+
+Una checklist solo es útil si se corre. Combino la revisión manual con tres herramientas:
+
+1. **`@axe-core/cli`** en CI para los fallos obvios (`alt` faltantes, labels faltantes, IDs duplicados, contraste malo en elementos estáticos).
+2. **Lighthouse** sobre la URL de preview desplegada para un puntaje general aproximado — el número no es la meta, pero una caída de 100 a 92 es señal de revisar.
+3. **Pasada manual de teclado**, cada vez, en cada ruta. Recorre toda la página con Tab. Activa cada botón y cada link. Abre cada modal. Cierra cada modal. Esto atrapa todo lo que las herramientas automatizadas no pueden — bugs de orden de tab, anillos de focus faltantes, saltos inesperados de focus.
+
+No creo en confiar solo en las herramientas de accesibilidad. Axe atrapa quizá el 40% de los problemas reales; el otro 60% necesita una persona que entienda qué intenta hacer la página. Pero ese 40% automatizado sale gratis una vez configurado, y atrapa regresiones que de otra forma yo enviaría.
+
+## Cómo aplico esto a un proyecto existente
+
+Cuando audito un sitio que ya está en vivo (el caso común — Chimneys Plus, EcoShop, Lumina en mi portafolio), lo hago en un orden específico:
+
+1. **Lee el DOM primero.** Abre la página desplegada, click derecho → Inspeccionar, y simplemente lee la estructura HTML. Antes de correr cualquier herramienta quiero ver: ¿hay un `<main>`? ¿Un solo `<h1>`? ¿Landmarks con sentido? Si los huesos están mal, arreglar el contraste es maquillar un cadáver.
+2. **Recorre la página con Tab.** Sin herramientas, sin lector de pantalla, solo Tab. Estoy buscando: ¿aparece el anillo de focus? ¿se mantiene visible? ¿el orden de tab coincide con el orden visual? ¿a dónde va el focus cuando abro un modal — y a dónde regresa cuando lo cierro?
+3. **Corre axe** para los fallos estáticos — alts faltantes, labels faltantes, IDs duplicados.
+4. **Corre Lighthouse** para el puntaje y la auditoría de contraste.
+5. **Hazle zoom al 200% y reduce a 320px.** ¿Algún scrollbar horizontal? ¿Algún texto recortado?
+6. **Arregla en el mismo orden de esta checklist.** Landmarks → skip link → teclado → contraste → touch → formularios.
+
+## Un layout.tsx mínimo que cubre la mayoría de las bases
+
+Si empezara un proyecto de Next.js desde cero hoy, el layout raíz ya traería la mayor parte de esto incluido:
+
+```tsx
+// app/layout.tsx
+export default function RootLayout({ children }) {
+  return (
+    <html lang="es">
+      <body className="min-h-screen antialiased">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+        >
+          Saltar al contenido principal
+        </a>
+        <Nav />
+        <main id="main">{children}</main>
+        <Footer />
+      </body>
+    </html>
+  );
+}
+```
+
+Más esto en `globals.css`:
+
+```css
+@layer base {
+  *:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+```
+
+Ese único archivo y ese bloque de CSS te saca de los tres fallos de WCAG más comunes en apps de Next.js enviadas a producción: `lang` faltante, skip link faltante y anillos de focus invisibles. Empieza cada proyecto así y ya hiciste más por la accesibilidad que la mayoría de los portafolios en internet.
+
+## La verdadera lección
+
+La accesibilidad no es una pasada aparte. Es parte de construir la cosa. La razón por la que puedo correr esta checklist en cuatro proyectos en una mañana es que la mayoría de las casillas ya estaban marcadas mientras escribía el código la primera vez — solo las verifico de nuevo antes de dar algo por terminado.
+
+Si nunca has hecho esta pasada en alguno de tus propios proyectos: empieza por los tres arreglos más baratos y de mayor valor, en este orden.
+
+1. Agrega `lang="es"` (o el idioma que sea) a `<html>` si no lo tiene.
+2. Agrega un skip link.
+3. Reemplaza cualquier anillo de focus tenue con uno sólido de 2px.
+
+Esos tres cambios toman diez minutos y te mueven de "falla los checks básicos" a "pasa la prueba de humo." Todo lo demás en esta lista se construye desde ahí.

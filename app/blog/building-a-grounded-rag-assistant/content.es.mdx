@@ -1,0 +1,192 @@
+## El problema
+
+Pasé un año en la fila de soporte Tier 1 de Google Maps Platform en HCLTech. Todos los días entraban las mismas preguntas: *RefererNotAllowedMapError*, *OVER_QUERY_LIMIT*, *cómo migro fuera de `google.maps.Marker`*, *cómo evito que se me agote el crédito mensual de 200 dólares a media mes*. La mayoría de las respuestas estaban en la documentación de Google — los desarrolladores no las encontraban, o se tropezaban con posts viejos de Stack Overflow que referenciaban APIs que ya habían sido renombradas, deprecadas o reestructuradas.
+
+Desde entonces, el panorama de Maps Platform ha cambiado. Google retiró el crédito mensual de 200 dólares y lo reemplazó con cuotas gratuitas por SKU. La Places API se reetiquetó, los nombres de SKU de la Routes API se reescribieron, y las librerías de Drawing y Heatmap entraron en la rampa de retiro para 2026. La herramienta tipo "ingeniero de soporte dentro del navegador" que hubiera querido que existiera en aquella época no solo necesitaría saber las respuestas de 2024 — necesitaría mantenerse al día con todo lo que Google haya cambiado desde entonces.
+
+Así que la construí. La promesa de RAG — *Retrieval-Augmented Generation* — es que evitas alucinaciones anclando las respuestas del modelo en documentación que tú controlas. Suena simple. Me tomó varias iteraciones grandes y un replanteo arquitectónico de fondo entregar realmente esa promesa.
+
+Este es el post-mortem de esas iteraciones. Cada puntaje que cito sale de una corrida de evaluación versionada en el [directorio `evals/results/` del repo](https://github.com/Ramon-Carrillo/google-maps-rag-assistant/tree/main/evals/results). Cada versión del prompt está en el encabezado del archivo [`system-prompt.md`](https://github.com/Ramon-Carrillo/google-maps-rag-assistant/blob/main/src/lib/prompts/system-prompt.md).
+
+## La línea base: RAG clásico de una sola etapa
+
+La primera versión fue de manual. Seis archivos Markdown cubriendo las seis áreas más preguntadas (facturación, deprecaciones, overview de Maps JS, Places, Routes, troubleshooting), partidos en chunks de ~800 tokens con 200 tokens de overlap, embebidos con `voyage-code-3` (1024 dimensiones), guardados en Neon Postgres con `pgvector`. Recuperación top-5 por coseno alimentando a `claude-sonnet-4-6` a través del Vercel AI SDK.
+
+```
+consulta del usuario → embed → match_documents(top 5) → LLM → stream
+```
+
+12 preguntas doradas como suite de evaluación — recuperación happy-path (9), rechazo fuera de alcance (2) y una pregunta adversarial sobre "precios de la Holographic API" para probar resistencia a alucinaciones.
+
+Escribí un scorer basado en regex para los rechazos porque era rápido. Primera evaluación: **7/12 (58%)**.
+
+## La primera lección fue sobre las evaluaciones, no sobre el modelo
+
+El 7/12 se veía terrible. Abrí el reporte y empecé a leer los fallos. Cinco de ellos se veían así:
+
+- **La respuesta real del modelo**: "No puedo ayudarte con eso — el clima está completamente fuera del alcance de Google Maps Platform."
+- **El veredicto de mi scorer regex**: FAIL. El regex buscaba frases como *"no puedo responder"* o *"no tengo información,"* y "fuera del alcance" no coincidía con ningún patrón.
+
+El modelo se estaba comportando correctamente. El scorer estaba mal.
+
+Reemplacé el regex con un juez LLM hecho con Claude Haiku, usando `generateObject` con un esquema de Zod. Mismas respuestas, mismas recuperaciones, puntaje nuevo: **11/12 (92%)**. No fue una mejora del modelo — fue una mejora del *scorer*.
+
+> **Lección:** Cuando escribes una suite de evaluación, el scorer es código. El código tiene bugs. Una evaluación que falla no siempre significa que lo que mides está roto — a veces lo que está roto es la medición. Mira las salidas antes de ajustar el prompt.
+
+Esta es la lección más valiosa que aprendí en este proyecto, y por eso el folder `evals/results/` tiene corridas versionadas desde la v1. El historial de git *es* la pista de auditoría.
+
+## Iteración del prompt: v2 → v3 → de regreso a v2
+
+El único fallo que quedaba era q12 (Holographic API). El modelo decía:
+
+> "No tengo suficiente información en la documentación actual para responder esto con confianza."
+
+Técnicamente correcto. Pero el juez Haiku lo marcó: *"La respuesta vaga del asistente evita reconocer directamente que la Holographic API no existe; en su lugar sugiere al usuario revisar la documentación oficial."*
+
+Crítica justa. A un usuario que pregunta por un producto inexistente le sirve más un "esto no es un producto real" que un "checa los docs."
+
+Escribí la **v3 del system prompt** con una regla nueva: *el rechazo enlatado es un piso, no un techo. Cuando el usuario pregunta por un producto que no está en el corpus en absoluto, dilo explícitamente y enumera productos adyacentes que SÍ existen.*
+
+Puntaje en v3: **9/12 (75%)**.
+
+La v3 rompió q10 (*"¿Cómo está el clima?"*) y q11 (*"¿Cómo despliego Lambda en AWS?"*). La instrucción "también enumera productos adyacentes" se filtró del caso de producto adversarial al caso genuinamente fuera de alcance. El modelo ahora le daba a quien preguntaba por el clima una lista útil de las APIs de Maps Platform que *sí podía* cubrir — lo cual el juez (correctamente) marcó como un rechazo demasiado largo.
+
+Reverti la v3. Me quedé en v2, 11/12. Dejé el intento de v3 como un experimento documentado en el changelog del encabezado del prompt para que el aprendizaje quedara visible.
+
+> **Lección:** Los cambios de prompt tienen efectos colaterales. "Arregla el único caso que falla" casi siempre también significa "verifica que los siete casos que pasan sigan pasando." La suite de evaluación no es solo para las regresiones que tú causaste — es para las regresiones que causan tus *buenas ideas*.
+
+En este punto tenía dos conclusiones:
+1. La iteración de prompt estaba en rendimientos decrecientes.
+2. El modo de fallo era realmente un problema de *recuperación* — el corpus no tenía suficiente señal para que el modelo diera el rechazo afilado que el juez quería.
+
+## Hacer el corpus más grande lo empeoró
+
+Hice un descubrimiento estructurado — [demand scout](https://github.com/Ramon-Carrillo/google-maps-rag-assistant/blob/main/.claude/agents/maps-docs-demand-scout.md) revisando actividad en Stack Overflow y GitHub Issues, [taxonomy mapper](https://github.com/Ramon-Carrillo/google-maps-rag-assistant/blob/main/.claude/agents/maps-docs-mapper.md) enumerando las áreas oficiales de la API de Google — y luego cruzé los dos reportes para priorizar nuevas docs. Dos batches después, el corpus creció de 6 → 12 archivos, 13 → 41 chunks. Agregué contenido con demanda real como `api-key-restrictions.md`, `advanced-markers.md`, `react-nextjs-integration.md`, `route-optimization.md`, `geocoding.md`, `address-validation.md`.
+
+Volví a correr las evaluaciones. Puntaje: **11/15** con tres preguntas nuevas de cola larga. El 11/12 del set original se mantuvo en 11/12 — pero una de las regresiones fue q12 (Holographic) *regresando*. Otra vez.
+
+La traza de recuperación lo explicaba. En un corpus de 41 chunks, la consulta adversarial ahora hacía match con tres chunks de facturación con similitud coseno de 0.55-0.60. Esos chunks no eran *sobre* la Holographic API, pero el bi-encoder los consideraba lo suficientemente cercanos. Con tres chunks "más o menos relevantes" en el contexto, el modelo suavizó un rechazo limpio para volverlo uno tibio.
+
+> **Lección:** Un corpus más grande no es automáticamente un corpus mejor. Conforme crece la densidad, el bi-encoder saca más casi-matches a la superficie, y los casi-matches marginales son activamente dañinos — empujan al modelo a tibiarse en lugar de rechazar.
+
+## El giro arquitectónico: RAG híbrido con cross-encoder
+
+Dos mejoras independientes salieron juntas.
+
+### Etapa 2: Voyage rerank-2
+
+Los embeddings de bi-encoder (los que usamos al recuperar) son rápidos pero imprecisos en la frontera de relevancia. Los cross-encoders — que ven la consulta y el candidato lado a lado — son medibles más precisos. El patrón estándar de la industria es **recuperación en dos etapas**:
+
+```
+etapa 1: bi-encoder → red ancha top 20 (umbral 0.3)
+etapa 2: cross-encoder → preciso top 5 (relevancia ≥ 0.5)
+```
+
+La red más ancha de la etapa 1 mejora el recall. El rerank de la etapa 2 mejora la precisión. Los chunks que no pasan el umbral del rerank producen un contexto vacío, lo cual dispara la regla de rechazo del system prompt limpiamente.
+
+```ts
+// src/lib/rag/retrieval.ts
+const candidates = await sql`
+  SELECT * FROM match_documents(
+    ${vectorLiteral}::vector(1024),
+    0.3,  // umbral más laxo antes del rerank
+    20    // pool de candidatos más amplio
+  )
+`;
+
+const reranked = await rerankDocuments(query, candidates.map(c => c.content), 5);
+
+return reranked
+  .filter((r) => r.relevance_score >= 0.5)
+  .map((r) => ({ ...candidates[r.index], similarity: r.relevance_score }));
+```
+
+Ya integrado, choqué con el rate limit del free tier de Voyage durante las evaluaciones (cubeta compartida de 3 RPM entre llamadas de embeddings y rerank). Le agregué un fallback elegante a ordenamiento por coseno cuando el rerank devuelve 429. En producción — donde las consultas llegan dispersas — el reranker corre normal. En corridas masivas de evaluación, degrada a solo etapa 1, que es la línea base que ya estábamos enviando.
+
+### El cambio mayor: búsqueda web agéntica
+
+El reranker ayuda a la precisión, pero no resuelve el problema de fondo: *el corpus es finito, y las preguntas de los usuarios no*. La documentación de Google Maps Platform son cientos de páginas a través de 30+ APIs, y Google actualiza constantemente. Ningún corpus estático sobrevive al contacto con la cola larga.
+
+La respuesta es **RAG híbrido**: corpus curado para preguntas comunes (rápido, privado, versionado), búsqueda web en vivo para la cola larga (siempre actual, sin mantenimiento de corpus). Así es como funcionan en producción la búsqueda de Perplexity y la navegación de ChatGPT.
+
+La integración de Claude con el Vercel AI SDK trae la herramienta administrada `webSearch_20260209` de Anthropic ya construida. Sin nueva API key, sin proveedor de búsqueda separado, restringida por dominio para que el modelo no se vaya a vagabundear a Stack Overflow:
+
+```ts
+// src/app/api/chat/route.ts
+const webSearchTool = anthropic.tools.webSearch_20260209({
+  maxUses: 3,
+  allowedDomains: ["developers.google.com", "cloud.google.com"],
+});
+
+const result = streamText({
+  model: anthropic(CHAT_MODEL),
+  system: systemPrompt,
+  messages: modelMessages,
+  tools: { web_search: webSearchTool },
+});
+```
+
+El system prompt obtuvo un árbol de decisión de tres casos:
+
+1. Si los chunks recuperados cubren la pregunta → responde desde el corpus, cita el corpus.
+2. Si el corpus es débil **pero la pregunta es del dominio** → llama `web_search`, cita las URLs web.
+3. Si la pregunta está completamente fuera de alcance → rechaza, NO busques.
+
+La primera prueba de humo en vivo que corrí fue tu pregunta exacta de una conversación previa: *"¿OVER_QUERY_LIMIT regresa código de estado HTTP 429?"* — que antes había recibido el rechazo de "no tengo suficiente información."
+
+El nuevo comportamiento: Claude miró el corpus, vio que no cubría específicamente códigos de estado HTTP, llamó `web_search` tres veces con consultas progresivamente más específicas y produjo esta respuesta:
+
+> "Depende de la API. Para REST APIs legacy como Geocoding y Directions, `OVER_QUERY_LIMIT` regresa como **HTTP 200 con el estatus de error en el cuerpo JSON/XML**, no como un error a nivel HTTP. APIs más nuevas como Routes y Tile API regresan HTTP 429 reales... \[sigue desglose detallado, con citas a páginas de developers.google.com]"
+
+Esa es una respuesta correcta, citada y matizada a una pregunta que el corpus estático nunca habría podido manejar.
+
+## Resultados actuales de evaluación
+
+15 preguntas doradas. 11 pasan. Específicamente:
+
+| Categoría | Resultado |
+|---|---|
+| Recuperación happy-path (9 preguntas) | 7 pasan, 2 fallos por estrictez del juez LLM |
+| Rechazo fuera de alcance (2) | 1 pasa, 1 fallo por estrictez del juez LLM |
+| Adversarial (1) | 1 falso positivo del juez LLM sobre afirmación de precios fabricados |
+| **Cola larga (nuevas, 3)** | **3/3 pasan** ← la victoria del Track 2 |
+
+Los cuatro fallos son varianza del juez LLM, no alucinaciones. Revisé cada respuesta a mano; ninguna fabrica datos. La señal real son las tres preguntas de cola larga — prueban específicamente preguntas que el corpus curado *no puede* responder, y pasan porque la capa de búsqueda web agéntica funciona.
+
+El siguiente paso aquí es voto multi-juez (tres jueces Haiku por pregunta, gana la mayoría) para suavizar la varianza. No bloqueante.
+
+## El sistema como está hoy
+
+```
+                      consulta del usuario
+                          │
+            embedding voyage-code-3
+                          │
+       pgvector match_documents (top 20, cos ≥ 0.3)
+                          │
+     voyage rerank-2 → quédate con top 5, score ≥ 0.5
+                          │
+           claude-sonnet-4-6 responde …
+                          │
+      ┌───────────────────┴───────────────────┐
+      │ ¿el corpus la cubre?                   │
+      │   SÍ  → cita el corpus, listo          │
+      │   NO, en dominio → llama web_search     │
+      │                  ↳ developers.google.com│
+      │                    cloud.google.com     │
+      │                    (máximo 3 usos)      │
+      │   NO, fuera de alcance → rechaza        │
+      └─────────────────────────────────────────┘
+```
+
+Desplegado en Vercel. En vivo en [google-maps-rag-assistant.vercel.app](https://google-maps-rag-assistant.vercel.app). El writeup completo de arquitectura y decisiones de diseño está en [/architecture](https://google-maps-rag-assistant.vercel.app/architecture). [El código está en GitHub](https://github.com/Ramon-Carrillo/google-maps-rag-assistant) — incluyendo cada corrida de evaluación, cada versión del prompt y el equipo de cinco agentes que mantiene el corpus.
+
+## De qué iba esto realmente
+
+El trabajo interesante no fue el modelo ni los embeddings. Esas eran decisiones de commodity. El trabajo interesante fue **medir** — construir un loop de evaluación capaz de distinguir "el modelo está mal" de "mi scorer está mal" de "el prompt está mal" de "la recuperación está mal." Sin ese loop, no habría podido iterar nada con seguridad.
+
+Cada decisión de ingeniería en este proyecto tiene un número asociado en git. Es la única forma que conozco de mantener honesto a un sistema RAG — y la única manera de decirle a alguien que lea el repo que construiste algo a propósito, no por accidente.
+
+<hr />
+
+> ¿Encontraste un hueco en el conocimiento del asistente? ¿O un bug? Me encantaría saberlo — [escríbeme](/#contact).

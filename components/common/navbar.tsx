@@ -6,6 +6,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { FaGithub, FaLinkedin } from 'react-icons/fa6'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { LangToggle } from '@/components/lang-toggle'
+import { useT } from '@/components/locale-provider'
 import { useActiveSection } from '@/hooks/use-active-section'
 import { cn } from '@/lib/utils'
 
@@ -22,19 +24,19 @@ import { cn } from '@/lib/utils'
  * match `useActiveSection`). Links without one (Blog) use pathname-
  * based active matching instead.
  */
-type NavLink = {
-  label: string
+type NavLinkConfig = {
+  labelKey: 'about' | 'projects' | 'blog' | 'contact'
   href: string
   sectionId?: 'about' | 'projects' | 'contact'
   /** Regex matched against pathname for page-based active state. */
   pathMatch?: RegExp
 }
 
-const NAV_LINKS: NavLink[] = [
-  { label: 'About',    href: '/#about',    sectionId: 'about'    },
-  { label: 'Projects', href: '/#projects', sectionId: 'projects' },
-  { label: 'Blog',     href: '/blog',      pathMatch: /^\/blog/  },
-  { label: 'Contact',  href: '/#contact',  sectionId: 'contact'  },
+const NAV_LINKS: NavLinkConfig[] = [
+  { labelKey: 'about',    href: '/#about',    sectionId: 'about'    },
+  { labelKey: 'projects', href: '/#projects', sectionId: 'projects' },
+  { labelKey: 'blog',     href: '/blog',      pathMatch: /^\/blog/  },
+  { labelKey: 'contact',  href: '/#contact',  sectionId: 'contact'  },
 ]
 
 const SOCIAL_LINKS = [
@@ -43,6 +45,7 @@ const SOCIAL_LINKS = [
 ] as const
 
 export function Navbar() {
+  const t = useT()
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
   const activeSection = useActiveSection(['hero', 'about', 'projects', 'contact'])
@@ -51,7 +54,7 @@ export function Navbar() {
   // or /projects/<slug>, we match by pathname instead.
   const isHome = pathname === '/'
 
-  function isLinkActive(link: NavLink): boolean {
+  function isLinkActive(link: NavLinkConfig): boolean {
     if (link.pathMatch && link.pathMatch.test(pathname)) return true
     if (link.sectionId && isHome && activeSection === link.sectionId) return true
     return false
@@ -91,7 +94,7 @@ export function Navbar() {
             (WCAG 2.2 minimum) — previously the text-only anchors were
             only 18px tall. aria-current="page" helps screen readers
             announce the currently-active section. */}
-        <nav aria-label='Primary navigation' className='hidden sm:block'>
+        <nav aria-label={t.nav.primaryNav} className='hidden sm:block'>
           <ul className='flex items-center gap-5'>
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
@@ -104,14 +107,14 @@ export function Navbar() {
                       ? 'font-medium text-foreground'
                       : 'text-muted-foreground hover:text-foreground',
                   )}>
-                  {link.label}
+                  {t.nav[link.labelKey]}
                 </a>
               </li>
             ))}
           </ul>
         </nav>
 
-        {/* ── Right side: social + theme ── */}
+        {/* ── Right side: social + lang + theme ── */}
         <div className='flex items-center gap-0.5'>
           {/* Social icons */}
           <div className='mr-1.5 hidden items-center gap-0.5 sm:flex'>
@@ -131,12 +134,13 @@ export function Navbar() {
             ))}
           </div>
 
+          <LangToggle />
           <ThemeToggle />
 
           {/* ── Hamburger (mobile only) ── */}
           <button
             type='button'
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-label={mobileOpen ? t.nav.closeMenu : t.nav.openMenu}
             aria-expanded={mobileOpen}
             aria-controls='mobile-nav'
             onClick={() => setMobileOpen((v) => !v)}
@@ -157,7 +161,7 @@ export function Navbar() {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
             className='border-t border-border/40 bg-background/95 backdrop-blur-sm sm:hidden'>
-            <nav aria-label='Mobile navigation'>
+            <nav aria-label={t.nav.mobileNav}>
               <ul className='flex flex-col px-6 py-4'>
                 {NAV_LINKS.map((link) => (
                   <li key={link.href}>
@@ -170,7 +174,7 @@ export function Navbar() {
                           ? 'font-medium text-foreground'
                           : 'text-muted-foreground hover:text-foreground',
                       )}>
-                      {link.label}
+                      {t.nav[link.labelKey]}
                     </a>
                   </li>
                 ))}

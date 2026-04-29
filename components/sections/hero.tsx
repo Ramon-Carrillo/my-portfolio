@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowRight, Mail, ChevronDown, BookOpen } from 'lucide-react'
 import { HeroCodeDemo } from '@/components/sections/hero-code-demo'
+import { useT } from '@/components/locale-provider'
 import { cn } from '@/lib/utils'
 
 // ─── animation variants ───────────────────────────────────────────────────────
@@ -27,6 +28,7 @@ const FADE_UP = {
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
 export function Hero() {
+  const t = useT()
   const reduced = useReducedMotion() ?? false
 
   return (
@@ -56,7 +58,7 @@ export function Hero() {
           <motion.p
             variants={FADE_UP}
             className='mb-3 text-sm font-medium uppercase tracking-widest text-primary-foreground/75'>
-            Hello, I&apos;m
+            {t.hero.hello}
           </motion.p>
 
           {/*
@@ -77,15 +79,13 @@ export function Hero() {
           <motion.p
             variants={FADE_UP}
             className='mb-5 text-xl font-light tracking-wide text-muted-foreground'>
-            Full-Stack Developer
+            {t.hero.role}
           </motion.p>
 
           <motion.p
             variants={FADE_UP}
             className='mb-9 max-w-md text-base leading-relaxed text-muted-foreground'>
-            I build production-grade web apps with Next.js, TypeScript, and
-            Claude — grounded AI, Stripe-powered checkouts, and accessible
-            interfaces that actually ship.
+            {t.hero.tagline}
           </motion.p>
 
           <motion.div variants={FADE_UP} className='flex flex-wrap gap-3'>
@@ -100,7 +100,7 @@ export function Hero() {
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 'focus-visible:ring-offset-2 focus-visible:ring-offset-background'
               )}>
-              View Projects
+              {t.hero.viewProjects}
               <ArrowRight className='size-4' aria-hidden='true' />
             </motion.a>
 
@@ -116,7 +116,7 @@ export function Hero() {
                 'focus-visible:ring-offset-2 focus-visible:ring-offset-background'
               )}>
               <BookOpen className='size-4' aria-hidden='true' />
-              Read the blog
+              {t.hero.readBlog}
             </motion.a>
 
             <motion.a
@@ -131,7 +131,7 @@ export function Hero() {
                 'focus-visible:ring-offset-2 focus-visible:ring-offset-background'
               )}>
               <Mail className='size-4' aria-hidden='true' />
-              Contact
+              {t.hero.contact}
             </motion.a>
 
           </motion.div>
@@ -146,7 +146,7 @@ export function Hero() {
       {/* ── Scroll-down cue ── */}
       <motion.a
         href='#about'
-        aria-label='Scroll to about section'
+        aria-label={t.hero.scrollToAbout}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.6, duration: 0.6 }}

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import { useT } from "@/components/locale-provider";
 
 /**
  * Hero right-column visual. Replaces the previous Lottie astronaut
@@ -40,6 +41,7 @@ const RESULTS = [
 ];
 
 export function HeroCodeDemo() {
+  const t = useT();
   const reduced = useReducedMotion() ?? false;
 
   // Variants are declared inline so the component stays self-contained.
@@ -90,7 +92,7 @@ export function HeroCodeDemo() {
       // the card via `overflow-x-auto` (allowed by WCAG 1.4.10 for
       // code content), so the card itself stays within the column.
       className="relative w-full max-w-md"
-      aria-label="Code example: a retrieval call from the Google Maps RAG Assistant returning three grounded sources"
+      aria-label={t.hero.codeDemoAria}
     >
       {/* Ambient glow behind the card — gives depth without adding weight */}
       <div
@@ -121,7 +123,7 @@ export function HeroCodeDemo() {
           aria-hidden="true"
         >
           <code>
-            <span className="text-white/40">{`// Grounded answers — no hallucinations.`}</span>
+            <span className="text-white/40">{t.hero.codeDemoComment}</span>
             {"\n"}
             <span className="text-[#c586c0]">const</span>
             {" "}
@@ -134,7 +136,7 @@ export function HeroCodeDemo() {
             <span className="text-[#dcdcaa]">retrieveRelevantDocs</span>
             <span className="text-white/60">(</span>
             {"\n  "}
-            <span className="text-[#ce9178]">{`"How do I fix RefererNotAllowedMapError?"`}</span>
+            <span className="text-[#ce9178]">{t.hero.codeDemoQuery}</span>
             {"\n"}
             <span className="text-white/60">);</span>
           </code>
@@ -143,11 +145,11 @@ export function HeroCodeDemo() {
         {/* ── Divider with an arrow that reinforces "input → output" ── */}
         <div className="flex items-center gap-3 border-y border-white/10 bg-white/[0.02] px-5 py-2">
           <span className="font-mono text-[10px] uppercase tracking-widest text-white/40">
-            retrieved
+            {t.hero.codeDemoRetrieved}
           </span>
           <span className="h-px flex-1 bg-white/10" aria-hidden="true" />
           <span className="font-mono text-[10px] text-white/30">
-            cosine sim
+            {t.hero.codeDemoCosine}
           </span>
         </div>
 
@@ -197,7 +199,7 @@ export function HeroCodeDemo() {
             aria-hidden="true"
             className="flex size-1.5 rounded-full bg-emerald-400"
           />
-          3 sources retrieved · grounded &amp; cited
+          {t.hero.codeDemoSummary}
         </div>
       </div>
     </motion.div>

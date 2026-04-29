@@ -1,100 +1,3 @@
-import Link from "next/link";
-import { ArrowLeft, ExternalLink } from "lucide-react";
-import { FaGithub } from "react-icons/fa6";
-import { formatPublishedDate, getPostBySlug } from "@/lib/posts";
-
-export const post = getPostBySlug("building-a-grounded-rag-assistant");
-
-export const metadata = {
-  title: post.title,
-  description: post.excerpt,
-  alternates: {
-    canonical: `https://ramoncarrillo.dev/blog/${post.slug}`,
-  },
-  openGraph: {
-    type: "article",
-    url: `https://ramoncarrillo.dev/blog/${post.slug}`,
-    title: `${post.title} · Ramon Carrillo`,
-    description: post.excerpt,
-    publishedTime: post.publishedAt,
-    authors: ["Ramon Carrillo"],
-    tags: post.tags,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: post.title,
-    description: post.excerpt,
-  },
-};
-
-{/* ───── Back link ───── */}
-
-<Link
-  href="/blog"
-  className="group inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
->
-  <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5" />
-  All posts
-</Link>
-
-{/* ───── Header ───── */}
-
-<header className="mt-8 mb-10 border-b border-border pb-8">
-  <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-    <time dateTime={post.publishedAt}>{formatPublishedDate(post.publishedAt)}</time>
-    <span aria-hidden="true">·</span>
-    <span>{post.readingTime}</span>
-    <span aria-hidden="true">·</span>
-    <span className="rounded-full border bg-card px-2 py-0.5 font-medium">
-      Case study
-    </span>
-  </div>
-
-  <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-    {post.title}
-  </h1>
-
-  <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-    {post.excerpt}
-  </p>
-
-  <div className="mt-6 flex flex-wrap gap-2">
-    {/* Lead action — same outlined structure as the others so the button
-        row reads as a cohesive group, but the primary-colored icon +
-        left-aligned border accent mark it as the main CTA. Outlined
-        buttons work reliably in both light and dark mode without any
-        text-on-primary contrast problems. */}
-    <a
-      href="https://google-maps-rag-assistant.vercel.app"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/70 hover:bg-primary/10"
-    >
-      <ExternalLink className="size-4 text-primary" />
-      Live demo
-    </a>
-    <a
-      href="https://github.com/Ramon-Carrillo/google-maps-rag-assistant"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
-    >
-      <FaGithub size={14} />
-      Source
-    </a>
-    <a
-      href="https://google-maps-rag-assistant.vercel.app/architecture"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
-    >
-      Architecture
-    </a>
-  </div>
-</header>
-
-{/* ───── Body ───── */}
-
 ## The problem
 
 I spent a year on the Tier 1 Google Maps Platform support queue at HCLTech. Every day, the same questions came in: *RefererNotAllowedMapError*, *OVER_QUERY_LIMIT*, *how do I migrate off `google.maps.Marker`*, *how do I keep my $200 monthly credit from running out mid-month*. Most of the answers were in Google's docs — the developers couldn't find them, or got tripped up by outdated Stack Overflow posts that referenced APIs that had been renamed, deprecated, or restructured.
@@ -283,8 +186,6 @@ Deployed on Vercel. Live at [google-maps-rag-assistant.vercel.app](https://googl
 The interesting work wasn't the model or the embeddings. Those were commodity choices. The interesting work was **measurement** — building an eval loop that could distinguish "the model is wrong" from "my scorer is wrong" from "the prompt is wrong" from "the retrieval is wrong." Without that loop, I couldn't have safely iterated on anything.
 
 Every engineering decision on this project has a number attached to it in git. That's the only way I know to keep a RAG system honest — and the only way to tell a reader of the repo that you built something on purpose, not by accident.
-
-{/* ───── Footer ───── */}
 
 <hr />
 

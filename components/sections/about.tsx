@@ -2,17 +2,13 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
+import { useLocale, useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
 
-// ─── content ─────────────────────────────────────────────────────────────────
-
-const BIO = [
-  "I'm a full-stack developer who came into engineering from the other side of the support phone. I spent a year at HCLTech as a Tier 1 Google Maps Platform support engineer — every day, I helped developers debug `RefererNotAllowedMapError`, untangle billing credits, and migrate off deprecated APIs.",
-  "That experience shaped how I build. I've seen exactly what breaks in production and how it feels when it does, so I write code with real users in mind: clear error states, grounded AI answers instead of confident hallucinations, citations where they matter, and accessibility treated as a baseline — not a retrofit.",
-  "Today I focus on production-grade web apps with Next.js, TypeScript, and Claude — including RAG systems, AI agents, and Stripe-powered storefronts. Most of my recent work is shipped live with committed eval suites so quality isn't a vibe, it's a number.",
-] as const;
-
-const STACK = [
+// Stack labels are mostly proper nouns / brand names so they stay
+// language-neutral. The two that aren't ("Accessibility") get
+// localized via the dictionary lookup at render time.
+const STACK_KEYS = [
   "TypeScript",
   "Next.js / React",
   "Tailwind CSS",
@@ -25,6 +21,10 @@ const STACK = [
   "RAG & pgvector",
   "Accessibility",
 ] as const;
+
+const STACK_TRANSLATIONS: Record<string, { en: string; es: string }> = {
+  Accessibility: { en: "Accessibility", es: "Accesibilidad" },
+};
 
 // ─── animation variants ───────────────────────────────────────────────────────
 // Children that carry only `variants` (no animate / whileInView of their own)
@@ -89,6 +89,8 @@ const VP = { once: true, margin: "-80px" } as const;
 // ─── component ───────────────────────────────────────────────────────────────
 
 export function About() {
+  const t = useT();
+  const locale = useLocale();
   const reduced = useReducedMotion() ?? false;
 
   return (
@@ -110,7 +112,7 @@ export function About() {
             <div className="relative w-full overflow-hidden rounded-2xl border border-border bg-card" style={{ aspectRatio: "3/4" }}>
               <Image
                 src="/images/about-picture.JPG"
-                alt="Ramon Carrillo, Full-Stack Developer"
+                alt={t.about.photoAlt}
                 fill
                 sizes="280px"
                 className="object-cover"
@@ -131,7 +133,7 @@ export function About() {
           className="mb-12 flex items-center gap-4"
         >
           <h2 className="text-3xl font-bold tracking-tight text-foreground">
-            About
+            {t.about.heading}
           </h2>
           <div className="h-px flex-1 bg-border" aria-hidden="true" />
         </motion.div>
@@ -144,7 +146,7 @@ export function About() {
           variants={STAGGER}
           className="mb-12 space-y-5"
         >
-          {BIO.map((paragraph, i) => (
+          {t.about.bio.map((paragraph, i) => (
             <motion.p
               key={i}
               variants={PARA}
@@ -174,7 +176,7 @@ export function About() {
           className="mb-6"
         >
           <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Tech Stack
+            {t.about.stackHeading}
           </h3>
         </motion.div>
 
@@ -184,22 +186,25 @@ export function About() {
           viewport={VP}
           variants={CHIP_GRID}
           className="flex flex-wrap gap-2"
-          aria-label="Technologies I work with"
+          aria-label={t.about.stackAria}
         >
-          {STACK.map((item) => (
-            <motion.li
-              key={item}
-              variants={CHIP}
-              className={cn(
-                "cursor-default rounded-lg border border-border bg-card",
-                "px-3.5 py-1.5 text-sm font-medium text-foreground",
-                "transition-colors duration-200",
-                "hover:border-primary/50 hover:bg-primary/5 hover:text-primary",
-              )}
-            >
-              {item}
-            </motion.li>
-          ))}
+          {STACK_KEYS.map((item) => {
+            const label = STACK_TRANSLATIONS[item]?.[locale] ?? item;
+            return (
+              <motion.li
+                key={item}
+                variants={CHIP}
+                className={cn(
+                  "cursor-default rounded-lg border border-border bg-card",
+                  "px-3.5 py-1.5 text-sm font-medium text-foreground",
+                  "transition-colors duration-200",
+                  "hover:border-primary/50 hover:bg-primary/5 hover:text-primary",
+                )}
+              >
+                {label}
+              </motion.li>
+            );
+          })}
         </motion.ul>
 
           </div>{/* end text column */}

@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import type { Project } from "@/lib/types";
+import { localizeProject } from "@/lib/i18n";
+import { useLocale, useT } from "@/components/locale-provider";
 import { getAccentBase } from "@/lib/accent";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +64,9 @@ interface ProjectCardProps {
  * the story that page is meant to tell.
  */
 export function ProjectCard({ project, priority }: ProjectCardProps) {
+  const locale = useLocale();
+  const t = useT();
+  const localized = localizeProject(project, locale);
   const base = getAccentBase(project.id);
   const hasLinks = project.href || project.repo;
 
@@ -81,7 +86,7 @@ export function ProjectCard({ project, priority }: ProjectCardProps) {
           without nesting anchors. The rest of the card is purely visual. */}
       <Link
         href={`/projects/${project.id}`}
-        aria-label={`View case study: ${project.title}`}
+        aria-label={`${t.projects.viewCaseStudyAria}: ${localized.title}`}
         className={cn(
           "absolute inset-0 z-10",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -120,10 +125,10 @@ export function ProjectCard({ project, priority }: ProjectCardProps) {
         />
 
         {/* Real screenshot — rendered on top when `project.image` is provided */}
-        {project.image && (
+        {localized.image && (
           <Image
-            src={project.image}
-            alt={project.imageAlt ?? `${project.title} — screenshot`}
+            src={localized.image}
+            alt={localized.imageAlt ?? `${localized.title} — ${t.projects.screenshotFallback}`}
             fill
             className="object-cover"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -134,7 +139,7 @@ export function ProjectCard({ project, priority }: ProjectCardProps) {
         {/* Concept badge — shown when project has no live link or repo */}
         {!hasLinks && (
           <span className="absolute left-3 top-3 z-[5] rounded-md bg-background/80 px-2 py-0.5 text-xs font-medium text-muted-foreground backdrop-blur-sm">
-            Concept
+            {t.projects.concept}
           </span>
         )}
       </div>
@@ -142,7 +147,7 @@ export function ProjectCard({ project, priority }: ProjectCardProps) {
       {/* ── Text content ─────────────────────────────────────────────────── */}
       <div className="p-5">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-semibold text-foreground">{project.title}</h3>
+          <h3 className="font-semibold text-foreground">{localized.title}</h3>
           <motion.span
             variants={arrowVariants}
             aria-hidden="true"
@@ -152,12 +157,12 @@ export function ProjectCard({ project, priority }: ProjectCardProps) {
           </motion.span>
         </div>
         <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-          {project.description}
+          {localized.description}
         </p>
 
         {/* Tags — show max 4, then a "+N" count badge */}
         <div className="mt-4 flex flex-wrap gap-1.5">
-          {project.tags.slice(0, 4).map((tag) => (
+          {localized.tags.slice(0, 4).map((tag) => (
             <span
               key={tag}
               className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
@@ -165,9 +170,9 @@ export function ProjectCard({ project, priority }: ProjectCardProps) {
               {tag}
             </span>
           ))}
-          {project.tags.length > 4 && (
+          {localized.tags.length > 4 && (
             <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-              +{project.tags.length - 4}
+              +{localized.tags.length - 4}
             </span>
           )}
         </div>

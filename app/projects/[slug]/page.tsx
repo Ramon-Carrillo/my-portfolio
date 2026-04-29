@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, BookOpen } from "lucide-react";
 import { FaGithub } from "react-icons/fa6";
 import { projects } from "@/lib/data";
 import { getAccentBase } from "@/lib/accent";
+import { LOCALE_COOKIE, dict, localizeProject, resolveLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 /**
@@ -16,9 +18,9 @@ import { cn } from "@/lib/utils";
  * `generateMetadata`. Next 16 passes `params` as a Promise; it must be
  * awaited in both the page component and the metadata function.
  *
- * Each page replaces the previous modal-only surface and gives every
- * project its own shareable URL, unique title/description, and rich
- * Open Graph card (see ./opengraph-image.tsx).
+ * The page itself reads the locale cookie and renders project text in
+ * the active language. Metadata stays English so SEO/OG remain
+ * consistent across both UI languages.
  */
 
 interface PageProps {
@@ -77,12 +79,18 @@ export default async function ProjectPage({ params }: PageProps) {
 
   if (!project) notFound();
 
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE)?.value);
+  const t = dict[locale];
+  const localized = localizeProject(project, locale);
+
   const base = getAccentBase(project.id);
   const hasLinks = project.href || project.repo;
 
   // Per-page JSON-LD — a focused CreativeWork with Person author reference.
   // Lives on the detail page so Google has a direct link between each
-  // shareable project URL and its structured metadata.
+  // shareable project URL and its structured metadata. JSON-LD stays in
+  // English regardless of UI locale (consistent SEO, single canonical).
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CreativeWork",
@@ -124,7 +132,7 @@ export default async function ProjectPage({ params }: PageProps) {
             className="size-4 transition-transform group-hover:-translate-x-0.5"
             aria-hidden="true"
           />
-          All projects
+          {t.projects.backToProjects}
         </Link>
 
         {/* ── Hero image (or accent placeholder if no screenshot) ── */}
@@ -146,10 +154,10 @@ export default async function ProjectPage({ params }: PageProps) {
             aria-hidden="true"
           />
 
-          {project.image && (
+          {localized.image && (
             <Image
-              src={project.image}
-              alt={project.imageAlt ?? `${project.title} — main screenshot`}
+              src={localized.image}
+              alt={localized.imageAlt ?? `${localized.title} — ${t.projects.mainScreenshotFallback}`}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 768px"
@@ -161,18 +169,18 @@ export default async function ProjectPage({ params }: PageProps) {
         {/* ── Title + description ── */}
         <header className="mt-10">
           <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            {project.title}
+            {localized.title}
           </h1>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-            {project.description}
+            {localized.description}
           </p>
 
           {/* Primary CTAs — prominent links to live + source */}
           {hasLinks && (
             <div className="mt-6 flex flex-wrap gap-3">
-              {project.href && (
+              {localized.href && (
                 <a
-                  href={project.href}
+                  href={localized.href}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={cn(
@@ -184,12 +192,12 @@ export default async function ProjectPage({ params }: PageProps) {
                   )}
                 >
                   <ExternalLink className="size-4" aria-hidden="true" />
-                  Live demo
+                  {t.projects.liveDemo}
                 </a>
               )}
-              {project.caseStudySlug && (
+              {localized.caseStudySlug && (
                 <Link
-                  href={`/blog/${project.caseStudySlug}`}
+                  href={`/blog/${localized.caseStudySlug}`}
                   className={cn(
                     "inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/5 px-5 py-2.5",
                     "text-sm font-medium text-foreground",
@@ -199,12 +207,12 @@ export default async function ProjectPage({ params }: PageProps) {
                   )}
                 >
                   <BookOpen className="size-4 text-primary" aria-hidden="true" />
-                  Read the case study
+                  {t.projects.readCaseStudy}
                 </Link>
               )}
-              {project.repo && (
+              {localized.repo && (
                 <a
-                  href={project.repo}
+                  href={localized.repo}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={cn(
@@ -216,7 +224,7 @@ export default async function ProjectPage({ params }: PageProps) {
                   )}
                 >
                   <FaGithub size={15} aria-hidden="true" />
-                  View source
+                  {t.projects.viewSource}
                 </a>
               )}
             </div>
@@ -224,25 +232,25 @@ export default async function ProjectPage({ params }: PageProps) {
         </header>
 
         {/* ── Long description ── */}
-        {project.longDescription && (
+        {localized.longDescription && (
           <section className="mt-10">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              About this project
+              {t.projects.aboutThisProject}
             </h2>
             <p className="mt-3 text-base leading-[1.85] text-muted-foreground">
-              {project.longDescription}
+              {localized.longDescription}
             </p>
           </section>
         )}
 
         {/* ── Highlights — only for projects with an opted-in "why it matters" list ── */}
-        {project.highlights && project.highlights.length > 0 && (
+        {localized.highlights && localized.highlights.length > 0 && (
           <section className="mt-10 rounded-xl border border-border/60 bg-card/60 p-6">
             <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-primary">
-              Why it matters
+              {t.projects.whyItMatters}
             </h2>
             <ul className="space-y-3">
-              {project.highlights.map((point, i) => (
+              {localized.highlights.map((point, i) => (
                 <li
                   key={i}
                   className="flex gap-3 text-sm leading-relaxed text-muted-foreground"
@@ -259,13 +267,13 @@ export default async function ProjectPage({ params }: PageProps) {
         )}
 
         {/* ── Tech stack ── */}
-        {project.tags.length > 0 && (
+        {localized.tags.length > 0 && (
           <section className="mt-10">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Stack
+              {t.projects.stack}
             </h2>
-            <ul className="mt-3 flex flex-wrap gap-2" aria-label="Technology stack">
-              {project.tags.map((tag) => (
+            <ul className="mt-3 flex flex-wrap gap-2" aria-label={t.projects.stackAria}>
+              {localized.tags.map((tag) => (
                 <li
                   key={tag}
                   className="rounded-lg border border-border bg-background px-3 py-1 text-xs font-medium text-foreground"
@@ -292,7 +300,7 @@ export default async function ProjectPage({ params }: PageProps) {
               className="size-4 transition-transform group-hover:-translate-x-0.5"
               aria-hidden="true"
             />
-            All projects
+            {t.projects.backToProjects}
           </Link>
         </div>
       </article>

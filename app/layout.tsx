@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -8,6 +9,7 @@ import { Navbar } from "@/components/common/navbar";
 import { Footer } from "@/components/common/footer";
 import { projects } from "@/lib/data";
 import { getAllPosts } from "@/lib/posts";
+import { LOCALE_COOKIE, resolveLocale, dict } from "@/lib/i18n";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -222,12 +224,20 @@ const jsonLd = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Read the persisted locale cookie on the server so the first paint
+  // is in the right language with no client flash. `cookies()` opts
+  // this layout into dynamic rendering — acceptable for a small
+  // portfolio. Default is Spanish (see DEFAULT_LOCALE in lib/i18n).
+  const cookieStore = await cookies();
+  const initialLocale = resolveLocale(cookieStore.get(LOCALE_COOKIE)?.value);
+  const tCommon = dict[initialLocale].common;
+
   return (
     <html
-      lang="en"
+      lang={initialLocale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
@@ -246,10 +256,10 @@ export default function RootLayout({
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
         >
-          Skip to main content
+          {tCommon.skipLink}
         </a>
 
-        <Providers>
+        <Providers initialLocale={initialLocale}>
           <SmoothScroll>
             <Navbar />
             <main id="main" className="flex-1 pt-14">{children}</main>

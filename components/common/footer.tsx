@@ -2,15 +2,16 @@
 
 import { FaGithub, FaLinkedin } from "react-icons/fa6";
 import { Heart } from "lucide-react";
+import { useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
 
 // Use absolute-slash form (/#about vs #about) so these anchors work
 // from any route, not just the home page. Matches the navbar.
 const QUICK_LINKS = [
-  { label: "About",    href: "/#about"    },
-  { label: "Projects", href: "/#projects" },
-  { label: "Blog",     href: "/blog"      },
-  { label: "Contact",  href: "/#contact"  },
+  { labelKey: "about",    href: "/#about"    },
+  { labelKey: "projects", href: "/#projects" },
+  { labelKey: "blog",     href: "/blog"      },
+  { labelKey: "contact",  href: "/#contact"  },
 ] as const;
 
 const SOCIAL_LINKS = [
@@ -19,6 +20,8 @@ const SOCIAL_LINKS = [
 ] as const;
 
 export function Footer() {
+  const t = useT();
+
   return (
     <footer className="border-t border-border bg-card/40">
       <div className="mx-auto max-w-5xl px-6 py-12">
@@ -35,24 +38,23 @@ export function Footer() {
               Ramon Carrillo
             </a>
             <p className="max-w-[18rem] text-xs leading-relaxed text-muted-foreground">
-              Production-grade web apps with Next.js, TypeScript, and Claude —
-              all shipped live.
+              {t.footer.tagline}
             </p>
           </div>
 
           {/* Quick links */}
-          <nav aria-label="Footer navigation">
+          <nav aria-label={t.footer.footerNav}>
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Quick Links
+              {t.footer.quickLinks}
             </p>
             <ul className="space-y-2">
-              {QUICK_LINKS.map(({ label, href }) => (
+              {QUICK_LINKS.map(({ labelKey, href }) => (
                 <li key={href}>
                   <a
                     href={href}
                     className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                   >
-                    {label}
+                    {t.nav[labelKey]}
                   </a>
                 </li>
               ))}
@@ -62,7 +64,7 @@ export function Footer() {
           {/* Social icons */}
           <div>
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Connect
+              {t.footer.connect}
             </p>
             <div className="flex items-center gap-1">
               {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
@@ -90,14 +92,14 @@ export function Footer() {
 
         {/* ── Bottom row: copyright + made with love ── */}
         <div className="flex flex-col items-center gap-2 text-xs text-muted-foreground sm:flex-row sm:justify-between">
-          <span>© {new Date().getFullYear()} Ramon Carrillo. All rights reserved.</span>
+          <span>{t.footer.copyright(new Date().getFullYear())}</span>
           <span className="flex items-center gap-1.5">
-            Made with{" "}
+            {t.footer.madeWith}{" "}
             <Heart
               className="size-3 fill-primary text-primary"
-              aria-label="love"
+              aria-label={t.footer.love}
             />{" "}
-            using Next.js &amp; Tailwind CSS
+            {t.footer.using}
           </span>
         </div>
 

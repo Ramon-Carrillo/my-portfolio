@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { ArrowLeft, Home, FolderOpen } from "lucide-react";
+import { LOCALE_COOKIE, dict, resolveLocale } from "@/lib/i18n";
 
 /**
  * Custom 404 page. Next.js renders this whenever a route can't be
@@ -17,7 +19,11 @@ export const metadata = {
     "That page couldn't be found. Head back home or browse my project case studies.",
 };
 
-export default function NotFound() {
+export default async function NotFound() {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get(LOCALE_COOKIE)?.value);
+  const t = dict[locale];
+
   return (
     <section
       className="flex min-h-[calc(100vh-3.5rem-1px)] flex-col items-center justify-center px-6 py-24 text-center"
@@ -32,12 +38,11 @@ export default function NotFound() {
       </p>
 
       <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-        No relevant documentation was found for this query.
+        {t.notFound.heading}
       </h1>
 
       <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-        That page doesn&apos;t exist — it may have moved, or you followed a
-        broken link. Try one of the links below.
+        {t.notFound.body}
       </p>
 
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -46,7 +51,7 @@ export default function NotFound() {
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <Home className="size-4" aria-hidden="true" />
-          Back home
+          {t.notFound.backHome}
         </Link>
 
         <Link
@@ -54,7 +59,7 @@ export default function NotFound() {
           className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-primary/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <FolderOpen className="size-4" aria-hidden="true" />
-          Browse projects
+          {t.notFound.browseProjects}
         </Link>
       </div>
 
