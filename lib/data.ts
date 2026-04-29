@@ -82,7 +82,7 @@ export const projects: Project[] = [
       "Plataforma de e-commerce lista para producción, construida con el App Router de Next.js. Maneja el carrito en el servidor, hace updates optimistas en la UI y tiene un flujo de checkout fluido con Stripe. La capa de datos usa Prisma ORM con PostgreSQL, con búsqueda full-text y filtros facetados de productos. Lighthouse arriba de 97 en todas las categorías.",
     tags: ["Next.js 16", "React 19", "TypeScript", "Stripe", "PostgreSQL", "Prisma", "Tailwind CSS", "Framer Motion", "React Hook Form", "Zod", "shadcn/ui"],
     image: "/images/e-commerce.png",
-    href: "https://lumina-store.vercel.app/",
+    href: "https://lumina-store-rden.vercel.app/",
     repo: "https://github.com/Ramon-Carrillo/lumina-store",
   },
   {
