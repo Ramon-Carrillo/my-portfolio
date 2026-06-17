@@ -128,7 +128,7 @@ const jsonLd = {
       "@id": `${SITE_URL}/#person`,
       name: "Ramon Carrillo",
       url: SITE_URL,
-      image: `${SITE_URL}/images/about-picture.JPG`,
+      image: `${SITE_URL}/images/about-picture.jpg`,
       jobTitle: "Full-Stack Developer",
       description: SHORT_DESCRIPTION,
       sameAs: [
