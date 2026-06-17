@@ -65,7 +65,7 @@ export const projects: Project[] = [
       "Sitio web de marketing para un proveedor local de servicios de chimeneas. Construido para establecer una presencia en línea confiable, con un escaparate de servicios, layout responsivo y flujos de contacto / agendamiento. Enfocado en rendimiento y SEO para que el negocio sea encontrado y convierta visitantes en prospectos.",
     tags: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Framer Motion", "shadcn/ui", "Responsive Design", "SEO"],
     image: "/images/chimneys-plus.png",
-    href: "https://chimneys-plus.vercel.app/",
+    href: "https://www.chimneyspluswi.com",
     repo: "https://github.com/Ramon-Carrillo/chimneys-plus",
   },
   {
