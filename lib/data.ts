@@ -66,7 +66,6 @@ export const projects: Project[] = [
     tags: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Framer Motion", "shadcn/ui", "Responsive Design", "SEO"],
     image: "/images/chimneys-plus.png",
     href: "https://www.chimneyspluswi.com",
-    repo: "https://github.com/Ramon-Carrillo/chimneys-plus",
   },
   {
     id: "ecommerce-platform",
